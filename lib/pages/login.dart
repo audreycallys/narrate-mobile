@@ -12,6 +12,8 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  bool togglePass = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,6 +126,46 @@ class _LoginPageState extends State<LoginPage> {
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: Colors.black,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 35),
+
+                      const Text(
+                        'Email',
+                        style: TextStyle(
+                          fontFamily: 'PlusJakartaSans',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      TextField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          hintText: 'Masukkan email',
+
+                          prefixIcon: const Icon(
+                            Icons.email_outlined,
+                            color: Colors.grey,
+                          ),
+
+                          filled: true,
+                          fillColor: const Color(0xFFF5F5F5),
+
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14,
+                            horizontal: 15,
+                          ),
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
                           ),
                         ),
                       ),
