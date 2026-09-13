@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:narrate_blog/constants/app_colors.dart';
-import 'package:narrate_blog/pages/register.dart';
+import 'package:narrate_blog/pages/login.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
+  final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -25,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             SizedBox(
               width: double.infinity,
-              height: 275,
+              height: 250,
               child: Stack(
                 children: [
                   Opacity(
@@ -105,7 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       const Center(
                         child: Text(
-                          'Selamat Datang Kembali',
+                          'Temukan Cerita Baru',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'PlusJakartaSans',
@@ -120,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       const Center(
                         child: Text(
-                          'Temukan ide, cerita, dan sudut pandang baru setiap hari.',
+                          'Buat akun dan mulai jelajahi dunia ide, cerita, dan inspirasi.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'PlusJakartaSans',
@@ -132,6 +133,46 @@ class _LoginPageState extends State<LoginPage> {
                       ),
 
                       const SizedBox(height: 35),
+
+                      const Text(
+                        'Nama Pengguna',
+                        style: TextStyle(
+                          fontFamily: 'PlusJakartaSans',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      TextField(
+                        controller: usernameController,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          hintText: 'Masukkan nama pengguna',
+
+                          prefixIcon: const Icon(
+                            Icons.person_outlined,
+                            color: Colors.grey,
+                          ),
+
+                          filled: true,
+                          fillColor: const Color(0xFFF5F5F5),
+
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 15,
+                          ),
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 15),
 
                       const Text(
                         'Email',
@@ -171,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
 
                       const Text(
                         'Kata Sandi',
@@ -225,13 +266,14 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 45),
+                      const SizedBox(height: 35),
 
                       SizedBox(
                         width: double.infinity,
                         height: 40,
                         child: ElevatedButton(
                           onPressed: () {
+                            print(usernameController.text);
                             print(emailController.text);
                             print(passwordController.text);
                           },
@@ -244,7 +286,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           child: const Text(
-                            'Masuk',
+                            'Daftar',
                             style: TextStyle(
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 18,
@@ -261,7 +303,7 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Text(
-                              'Belum punya akun? ',
+                              'Sudah punya akun? ',
                               style: TextStyle(
                                 fontFamily: 'PlusJakartaSans',
                                 fontSize: 13,
@@ -277,12 +319,12 @@ class _LoginPageState extends State<LoginPage> {
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const RegisterPage(),
+                                    builder: (context) => const LoginPage(),
                                   ),
                                 );
                               },
                               child: const Text(
-                                'Daftar',
+                                'Masuk',
                                 style: TextStyle(
                                   fontFamily: 'PlusJakartaSans',
                                   fontSize: 13,
