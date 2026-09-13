@@ -172,7 +172,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
 
                       const Text(
                         'Email',
@@ -212,7 +212,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
 
                       const Text(
                         'Kata Sandi',
@@ -266,7 +266,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
 
-                      const SizedBox(height: 45),
+                      const SizedBox(height: 35),
 
                       SizedBox(
                         width: double.infinity,
