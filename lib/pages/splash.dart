@@ -9,33 +9,50 @@ class SplashPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.primary,
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 70),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset('assets/images/logo/white.png', width: 96),
-
-                const SizedBox(width: 5),
-
-                const Text(
-                  "Narrate",
-                  style: TextStyle(
-                    fontFamily: 'PlayfairDisplay',
-                    fontSize: 30,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 45),
+          child: Column(
+            children: [
+              const SizedBox(height: 60),
+          
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/images/logo/white.png', width: 96),
+          
+                  const SizedBox(width: 5),
+          
+                  const Text(
+                    "Narrate",
+                    style: TextStyle(
+                      fontFamily: 'PlayfairDisplay',
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.white,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+          
+              const SizedBox(height: 50),
+          
+              Image.asset('assets/images/splash.png', width: 325),
 
-            const SizedBox(height: 70),
-            
-            Image.asset('assets/images/splash.png')
-          ],
+              const SizedBox(height: 50),
+          
+              const Text(
+                "Temukan ide, pengalaman, dan perspektif melalui setiap artikel.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.white,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
