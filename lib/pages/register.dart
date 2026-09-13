@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:narrate_blog/constants/app_colors.dart';
+import 'package:narrate_blog/pages/login.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -314,7 +315,14 @@ class _RegisterPageState extends State<RegisterPage> {
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
                               ),
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginPage(),
+                                  ),
+                                );
+                              },
                               child: const Text(
                                 'Masuk',
                                 style: TextStyle(
