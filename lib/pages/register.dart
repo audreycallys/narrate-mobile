@@ -125,7 +125,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'PlusJakartaSans',
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w500,
                             color: Colors.black,
                           ),
