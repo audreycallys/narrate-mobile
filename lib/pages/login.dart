@@ -169,6 +169,55 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
+
+                      SizedBox(height: 20),
+
+                      const Text(
+                        'Kata Sandi',
+                        style: TextStyle(
+                          fontFamily: 'PlusJakartaSans',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      TextField(
+                        controller: passwordController,
+                        obscureText: togglePass,
+                        decoration: InputDecoration(
+                          hintText: 'Masukkan kata sandi',
+
+                          prefixIcon: const Icon(
+                            Icons.lock_outline,
+                            color: Colors.grey,
+                          ),
+
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                togglePass = !togglePass;
+                              });
+                            },
+                            icon: Icon(
+                              togglePass
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: Colors.grey,
+                            ),
+                          ),
+
+                          filled: true,
+                          fillColor: const Color(0xFFF5F5F5),
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
