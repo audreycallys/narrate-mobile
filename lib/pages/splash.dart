@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:narrate_blog/constants/app_colors.dart';
+import 'package:narrate_blog/pages/login.dart';
 
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
@@ -56,7 +57,14 @@ class SplashPage extends StatelessWidget {
                 width: double.infinity,
                 height: 42,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.white,
                     foregroundColor: AppColors.primary,
