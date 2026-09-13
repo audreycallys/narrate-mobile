@@ -10,11 +10,9 @@ class SplashPage extends StatelessWidget {
       backgroundColor: AppColors.primary,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 45),
+          padding: const EdgeInsets.symmetric(horizontal: 45, vertical: 70),
           child: Column(
             children: [
-              const SizedBox(height: 60),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -56,7 +54,7 @@ class SplashPage extends StatelessWidget {
 
               SizedBox(
                 width: double.infinity,
-                height: 40,
+                height: 42,
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
@@ -69,6 +67,31 @@ class SplashPage extends StatelessWidget {
                   ),
                   child: const Text(
                     'Masuk',
+                    style: TextStyle(
+                      fontFamily: 'PlusJakartaSans',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                height: 42,
+                child: OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.white,
+                    side: const BorderSide(color: AppColors.white, width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: const Text(
+                    'Daftar',
                     style: TextStyle(
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 18,
