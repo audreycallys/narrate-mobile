@@ -17,8 +17,8 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: AppColors.primary,
       body: SafeArea(
-        child: Stack(
-          alignment: Alignment.center,
+        bottom: false,
+        child: Column(
           children: [
             SizedBox(
               width: double.infinity,
@@ -79,6 +79,15 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ],
+              ),
+            ),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+                ),
               ),
             ),
           ],
