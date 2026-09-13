@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             SizedBox(
               width: double.infinity,
-              height: 260,
+              height: 275,
               child: Stack(
                 children: [
                   Opacity(
@@ -35,6 +35,45 @@ class _LoginPageState extends State<LoginPage> {
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset('assets/images/logo/white.png', width: 225),
+                        const Text(
+                          'Narrate',
+                          style: TextStyle(
+                            fontFamily: 'PlayfairDisplay',
+                            fontSize: 30,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    top: 20,
+                    left: 35,
+                    child: Container(
+                      width: 42,
+                      height: 42,
+                      decoration: const BoxDecoration(
+                        color: AppColors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: AppColors.primary,
+                          size: 20,
                         ),
                       ),
                     ),
