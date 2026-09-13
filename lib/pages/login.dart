@@ -39,6 +39,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
+
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -56,6 +57,7 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                   ),
+
                   Positioned(
                     top: 20,
                     left: 35,
@@ -67,6 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
+                        padding: EdgeInsets.zero,
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -81,12 +84,51 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
             ),
+
             Expanded(
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 35,
+                    vertical: 45,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(
+                        child: Text(
+                          'Selamat Datang Kembali',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'PlusJakartaSans',
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 6),
+
+                      const Center(
+                        child: Text(
+                          'Temukan ide, cerita, dan sudut pandang baru setiap hari.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'PlusJakartaSans',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
