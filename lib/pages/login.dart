@@ -159,7 +159,7 @@ class _LoginPageState extends State<LoginPage> {
                           fillColor: const Color(0xFFF5F5F5),
 
                           contentPadding: const EdgeInsets.symmetric(
-                            vertical: 14,
+                            vertical: 8,
                             horizontal: 15,
                           ),
 
@@ -170,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
 
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
                       const Text(
                         'Kata Sandi',
@@ -212,6 +212,11 @@ class _LoginPageState extends State<LoginPage> {
                           filled: true,
                           fillColor: const Color(0xFFF5F5F5),
 
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 15,
+                          ),
+
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
                             borderSide: BorderSide.none,
@@ -245,6 +250,40 @@ class _LoginPageState extends State<LoginPage> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 5),
+
+                      Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'Belum punya akun? ',
+                              style: TextStyle(
+                                fontFamily: 'PlusJakartaSans',
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                              ),
+                              onPressed: () {},
+                              child: const Text(
+                                'Daftar',
+                                style: TextStyle(
+                                  fontFamily: 'PlusJakartaSans',
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
