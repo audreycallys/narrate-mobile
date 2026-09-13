@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/pages/login.dart';
+import 'package:narrate_blog/pages/register.dart';
 
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
@@ -90,7 +91,14 @@ class SplashPage extends StatelessWidget {
                 width: double.infinity,
                 height: 42,
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const RegisterPage(),
+                      ),
+                    );
+                  },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.white,
                     side: const BorderSide(color: AppColors.white, width: 2),
