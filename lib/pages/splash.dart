@@ -14,14 +14,14 @@ class SplashPage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 60),
-          
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset('assets/images/logo/white.png', width: 96),
-          
+
                   const SizedBox(width: 5),
-          
+
                   const Text(
                     "Narrate",
                     style: TextStyle(
@@ -33,13 +33,13 @@ class SplashPage extends StatelessWidget {
                   ),
                 ],
               ),
-          
+
               const SizedBox(height: 50),
-          
+
               Image.asset('assets/images/splash.png', width: 325),
 
               const SizedBox(height: 50),
-          
+
               const Text(
                 "Temukan ide, pengalaman, dan perspektif melalui setiap artikel.",
                 textAlign: TextAlign.center,
@@ -49,6 +49,32 @@ class SplashPage extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   color: AppColors.white,
                   height: 1.4,
+                ),
+              ),
+
+              const SizedBox(height: 50),
+
+              SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.white,
+                    foregroundColor: AppColors.primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: const Text(
+                    'Masuk',
+                    style: TextStyle(
+                      fontFamily: 'PlusJakartaSans',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],
