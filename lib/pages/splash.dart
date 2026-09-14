@@ -12,7 +12,7 @@ class SplashPage extends StatelessWidget {
       backgroundColor: AppColors.primary,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 70),
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 70),
           child: Column(
             children: [
               Row(

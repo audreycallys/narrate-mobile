@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,6 +13,32 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentCarousel = 0;
+
+  List posts = [];
+
+  Future<void> getPosts() async {
+    final response = await http.get(
+      Uri.parse('https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      setState(() {
+        posts = data['data']['posts'];
+      });
+
+      print(posts);
+    } else {
+      print('Data artikel gagal diambil');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getPosts();
+  }
 
   @override
   Widget build(BuildContext context) {
