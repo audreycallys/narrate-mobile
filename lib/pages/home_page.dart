@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+
+import 'package:narrate_blog/constants/app_colors.dart';
+import 'package:narrate_blog/pages/detail_article_page.dart';
+import 'package:narrate_blog/services/category_service.dart';
 import 'package:narrate_blog/services/post_service.dart';
 import 'package:narrate_blog/widgets/article_card.dart';
 
@@ -15,6 +18,7 @@ class _HomePageState extends State<HomePage> {
   int currentCarousel = 0;
 
   List posts = [];
+  List categories = [];
 
   Future<void> getPosts() async {
     final result = await PostService.getPosts();
@@ -24,10 +28,29 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> getCategories() async {
+    final result = await CategoryService.getCategories();
+
+    setState(() {
+      categories = result;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+
     getPosts();
+    getCategories();
+  }
+
+  String getCategoryName(int categoryId) {
+    final category = categories.firstWhere(
+      (category) => category['id'] == categoryId,
+      orElse: () => {'name': 'Artikel'},
+    );
+
+    return category['name'];
   }
 
   String formatDate(String createdAt) {
@@ -103,7 +126,7 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
 
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 24,
                       backgroundColor: AppColors.primary,
                     ),
@@ -155,67 +178,84 @@ class _HomePageState extends State<HomePage> {
                       },
                     ),
                     items: posts.take(3).map((post) {
-                      return Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.symmetric(horizontal: 2),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.network(
-                                post['imageUrl'],
-                                fit: BoxFit.cover,
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailArticlePage(
+                                post: post,
+                                categoryName: getCategoryName(
+                                  post['categoryId'],
+                                ),
                               ),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.symmetric(horizontal: 2),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.network(
+                                  post['imageUrl'],
+                                  fit: BoxFit.cover,
+                                ),
 
-                              Container(
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.transparent,
-                                      Colors.black87,
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black87,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                Positioned(
+                                  left: 18,
+                                  right: 18,
+                                  bottom: 14,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        post['title'],
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontFamily: 'PlusJakartaSans',
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 5),
+
+                                      Text(
+                                        '${formatDate(post['createdAt'])} • '
+                                        '${calculateReadingTime(post['content'])} Menit Baca',
+                                        style: const TextStyle(
+                                          fontFamily: 'PlusJakartaSans',
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
-                              ),
-
-                              Positioned(
-                                left: 18,
-                                right: 18,
-                                bottom: 14,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      post['title'],
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontFamily: 'PlusJakartaSans',
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 5),
-
-                                    Text(
-                                      '${formatDate(post['createdAt'])} • '
-                                      '${calculateReadingTime(post['content'])} Menit Baca',
-                                      style: const TextStyle(
-                                        fontFamily: 'PlusJakartaSans',
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -270,69 +310,85 @@ class _HomePageState extends State<HomePage> {
                       itemBuilder: (context, index) {
                         final post = popularPosts[index];
 
-                        return SizedBox(
-                          width: 140,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Image.network(
-                                  post['imageUrl'],
-                                  fit: BoxFit.cover,
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DetailArticlePage(
+                                  post: post,
+                                  categoryName: getCategoryName(
+                                    post['categoryId'],
+                                  ),
                                 ),
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: SizedBox(
+                            width: 140,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Image.network(
+                                    post['imageUrl'],
+                                    fit: BoxFit.cover,
+                                  ),
 
-                                Container(
-                                  decoration: const BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black87,
+                                  Container(
+                                    decoration: const BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Colors.transparent,
+                                          Colors.black87,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                  Positioned(
+                                    left: 8,
+                                    right: 8,
+                                    bottom: 8,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          post['title'],
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontFamily: 'PlusJakartaSans',
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 4),
+
+                                        Text(
+                                          '${formatDate(post['createdAt'])} • '
+                                          '${calculateReadingTime(post['content'])} Menit Baca',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontFamily: 'PlusJakartaSans',
+                                            fontSize: 8,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
-                                ),
-
-                                Positioned(
-                                  left: 8,
-                                  right: 8,
-                                  bottom: 8,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        post['title'],
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontFamily: 'PlusJakartaSans',
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-
-                                      const SizedBox(height: 4),
-
-                                      Text(
-                                        '${formatDate(post['createdAt'])} • '
-                                        '${calculateReadingTime(post['content'])} Menit Baca',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontFamily: 'PlusJakartaSans',
-                                          fontSize: 8,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.white70,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );
@@ -343,7 +399,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 25),
 
                 const Text(
-                  'Artikel Terbaru',
+                  'Semua Artikel',
                   style: TextStyle(
                     fontFamily: 'PlusJakartaSans',
                     fontSize: 18,
@@ -356,23 +412,35 @@ class _HomePageState extends State<HomePage> {
 
                 if (posts.isNotEmpty)
                   Column(
-                    children: List.generate(
-                      posts.length > 5 ? 5 : posts.length,
-                      (index) {
-                        final post = posts[index];
+                    children: List.generate(posts.length, (index) {
+                      final post = posts[index];
 
-                        return ArticleCard(
-                          imageUrl: post['imageUrl'],
-                          title: post['title'],
-                          createdAt: post['createdAt'],
-                          content: post['content'],
-                          isSaved: false,
-                          onBookmarkTap: () {
-                            print('Bookmark artikel ${post['id']}');
-                          },
-                        );
-                      },
-                    ),
+                      return ArticleCard(
+                        imageUrl: post['imageUrl'],
+                        title: post['title'],
+                        createdAt: post['createdAt'],
+                        content: post['content'],
+                        isSaved: false,
+
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailArticlePage(
+                                post: post,
+                                categoryName: getCategoryName(
+                                  post['categoryId'],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+
+                        onBookmarkTap: () {
+                          print('Bookmark artikel ${post['id']}');
+                        },
+                      );
+                    }),
                   ),
               ],
             ),

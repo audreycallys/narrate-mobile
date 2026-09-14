@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:narrate_blog/pages/detail_article_page.dart';
 import 'package:narrate_blog/services/post_service.dart';
 import 'package:narrate_blog/widgets/article_card.dart';
 
@@ -121,6 +122,19 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                             createdAt: post['createdAt'],
                             content: post['content'],
                             isSaved: false,
+
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetailArticlePage(
+                                    post: post,
+                                    categoryName: widget.categoryName,
+                                  ),
+                                ),
+                              );
+                            },
+
                             onBookmarkTap: () {
                               print('Bookmark artikel ${post['id']}');
                             },
