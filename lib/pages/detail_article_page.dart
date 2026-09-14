@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:narrate_blog/constants/app_colors.dart';
 
-class DetailArticlePage extends StatelessWidget {
+import 'package:narrate_blog/constants/app_colors.dart';
+import 'package:narrate_blog/services/saved_service.dart';
+
+class DetailArticlePage extends StatefulWidget {
   final Map post;
   final String categoryName;
 
@@ -10,6 +12,14 @@ class DetailArticlePage extends StatelessWidget {
     required this.post,
     required this.categoryName,
   });
+
+  @override
+  State<DetailArticlePage> createState() => _DetailArticlePageState();
+}
+
+class _DetailArticlePageState extends State<DetailArticlePage> {
+  bool isSaved = false;
+  bool isSaving = false;
 
   String formatDate(String createdAt) {
     final date = DateTime.parse(createdAt).toLocal();
@@ -39,9 +49,86 @@ class DetailArticlePage extends StatelessWidget {
     return minutes < 1 ? 1 : minutes;
   }
 
+  Future<void> saveArticle() async {
+    if (isSaving) return;
+
+    setState(() {
+      isSaving = true;
+    });
+
+    try {
+      final postId = widget.post['id'];
+
+      final success = isSaved
+          ? await SavedService.deleteSavedPost(postId)
+          : await SavedService.savePost(postId);
+
+      if (!mounted) return;
+
+      setState(() {
+        isSaving = false;
+
+        if (success) {
+          isSaved = !isSaved;
+        }
+      });
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isSaved
+                  ? 'Artikel berhasil disimpan'
+                  : 'Artikel dihapus dari tersimpan',
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Artikel gagal disimpan')));
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isSaving = false;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Artikel gagal disimpan')));
+    }
+  }
+
+  Future<void> checkSavedStatus() async {
+    final savedPosts = await SavedService.getSavedPosts();
+
+    final postId = widget.post['id'];
+
+    final alreadySaved = savedPosts.any((saved) {
+      final post = saved['post'] ?? saved;
+      final savedId = post['id'] ?? saved['postId'];
+
+      return savedId == postId;
+    });
+
+    if (!mounted) return;
+
+    setState(() {
+      isSaved = alreadySaved;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkSavedStatus();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final tags = post['tags'] ?? [];
+    final tags = widget.post['tags'] ?? [];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -52,7 +139,7 @@ class DetailArticlePage extends StatelessWidget {
             Stack(
               children: [
                 Image.network(
-                  post['imageUrl'],
+                  widget.post['imageUrl'],
                   width: double.infinity,
                   height: 300,
                   fit: BoxFit.cover,
@@ -64,6 +151,7 @@ class DetailArticlePage extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // BACK
                         InkWell(
                           onTap: () {
                             Navigator.pop(context);
@@ -85,21 +173,42 @@ class DetailArticlePage extends StatelessWidget {
 
                         Row(
                           children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.bookmark_border,
-                                size: 24,
+                            // =========================
+                            // BOOKMARK
+                            // =========================
+                            InkWell(
+                              onTap: isSaving ? null : saveArticle,
+                              borderRadius: BorderRadius.circular(50),
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: isSaving
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.primary,
+                                        ),
+                                      )
+                                    : Icon(
+                                        isSaved
+                                            ? Icons.bookmark
+                                            : Icons.bookmark_border,
+                                        size: 24,
+                                        color: isSaved
+                                            ? AppColors.primary
+                                            : Colors.black,
+                                      ),
                               ),
                             ),
 
                             const SizedBox(width: 10),
 
+                            // MORE
                             Container(
                               width: 44,
                               height: 44,
@@ -136,7 +245,7 @@ class DetailArticlePage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          categoryName,
+                          widget.categoryName,
                           style: const TextStyle(
                             fontFamily: 'PlusJakartaSans',
                             fontSize: 10,
@@ -147,7 +256,7 @@ class DetailArticlePage extends StatelessWidget {
                       ),
 
                       Text(
-                        '${calculateReadingTime(post['content'])} Menit Baca',
+                        '${calculateReadingTime(widget.post['content'])} Menit Baca',
                         style: const TextStyle(
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 10,
@@ -161,7 +270,7 @@ class DetailArticlePage extends StatelessWidget {
                   const SizedBox(height: 12),
 
                   Text(
-                    post['title'],
+                    widget.post['title'],
                     style: const TextStyle(
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 24,
@@ -199,7 +308,7 @@ class DetailArticlePage extends StatelessWidget {
                           const SizedBox(height: 2),
 
                           Text(
-                            formatDate(post['createdAt']),
+                            formatDate(widget.post['createdAt']),
                             style: const TextStyle(
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 10,
@@ -247,7 +356,7 @@ class DetailArticlePage extends StatelessWidget {
                   const SizedBox(height: 22),
 
                   Text(
-                    post['content'],
+                    widget.post['content'],
                     style: const TextStyle(
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 14,
