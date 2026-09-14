@@ -276,6 +276,13 @@ class _RegisterPageState extends State<RegisterPage> {
                             print(usernameController.text);
                             print(emailController.text);
                             print(passwordController.text);
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginPage(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
