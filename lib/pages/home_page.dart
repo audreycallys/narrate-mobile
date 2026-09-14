@@ -31,6 +31,12 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final popularPosts = [...posts];
+
+    popularPosts.sort(
+      (a, b) => (b['viewCount'] ?? 0).compareTo(a['viewCount'] ?? 0),
+    );
+
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -202,6 +208,69 @@ class _HomePageState extends State<HomePage> {
                 ),
 
                 const SizedBox(height: 15),
+
+                if (posts.isNotEmpty)
+                  SizedBox(
+                    height: 125,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: popularPosts.length > 5
+                          ? 5
+                          : popularPosts.length,
+                      separatorBuilder: (context, index) {
+                        return const SizedBox(width: 12);
+                      },
+                      itemBuilder: (context, index) {
+                        final post = popularPosts[index];
+
+                        return SizedBox(
+                          width: 125,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.network(
+                                  post['imageUrl'],
+                                  fit: BoxFit.cover,
+                                ),
+
+                                Container(
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black87,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                Positioned(
+                                  left: 8,
+                                  right: 8,
+                                  bottom: 8,
+                                  child: Text(
+                                    post['title'],
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
               ],
             ),
           ),
