@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:narrate_blog/services/category_service.dart';
 import 'package:narrate_blog/services/post_service.dart';
+import 'package:narrate_blog/pages/category_detail_page.dart';
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key});
@@ -167,55 +168,69 @@ class _CategoryPageState extends State<CategoryPage> {
 
                           final articleCount = getArticleCount(category['id']);
 
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: getCategoryColor(category['name']),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 58,
-                                  height: 58,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0x66FFFFFF),
-                                    borderRadius: BorderRadius.circular(16),
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CategoryDetailPage(
+                                    categoryId: category['id'],
+                                    categoryName: category['name'],
                                   ),
-                                  child: Icon(
-                                    getCategoryIcon(category['name']),
-                                    size: 34,
-                                    color: getCategoryIconColor(
-                                      category['name'],
+                                ),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: getCategoryColor(category['name']),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 58,
+                                    height: 58,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0x66FFFFFF),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Icon(
+                                      getCategoryIcon(category['name']),
+                                      size: 34,
+                                      color: getCategoryIconColor(
+                                        category['name'],
+                                      ),
                                     ),
                                   ),
-                                ),
 
-                                const SizedBox(height: 14),
+                                  const SizedBox(height: 14),
 
-                                Text(
-                                  category['name'],
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.black,
+                                  Text(
+                                    category['name'],
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black,
+                                    ),
                                   ),
-                                ),
 
-                                const SizedBox(height: 4),
+                                  const SizedBox(height: 4),
 
-                                Text(
-                                  '$articleCount Artikel',
-                                  style: const TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xFF7B7B7B),
+                                  Text(
+                                    '$articleCount Artikel',
+                                    style: const TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF7B7B7B),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           );
                         },
