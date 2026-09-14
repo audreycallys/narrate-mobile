@@ -134,7 +134,7 @@ class _CategoryPageState extends State<CategoryPage> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(30, 30, 30, 10),
+          padding: const EdgeInsets.fromLTRB(25, 30, 25, 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -160,7 +160,7 @@ class _CategoryPageState extends State<CategoryPage> {
                               crossAxisCount: 2,
                               crossAxisSpacing: 18,
                               mainAxisSpacing: 18,
-                              childAspectRatio: 1.10,
+                              childAspectRatio: 1.15,
                             ),
                         itemBuilder: (context, index) {
                           final category = categories[index];
