@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/services/saved_service.dart';
 import 'package:narrate_blog/widgets/article_card.dart';
+import 'package:narrate_blog/pages/detail_article.dart';
+import 'package:narrate_blog/services/category_service.dart';
 
 class SavedPage extends StatefulWidget {
   const SavedPage({super.key});
@@ -138,6 +140,31 @@ class _SavedPageState extends State<SavedPage> {
                               if (postId != null) {
                                 removeSavedPost(postId);
                               }
+                            },
+
+                            onTap: () async {
+                              final categories =
+                                  await CategoryService.getCategories();
+
+                              final category = categories.firstWhere(
+                                (category) =>
+                                    category['id'] == post['categoryId'],
+                                orElse: () => {'name': 'Artikel'},
+                              );
+
+                              if (!context.mounted) return;
+
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetailArticlePage(
+                                    post: post,
+                                    categoryName: category['name'],
+                                  ),
+                                ),
+                              );
+
+                              await getSavedPosts();
                             },
                           );
                         },
