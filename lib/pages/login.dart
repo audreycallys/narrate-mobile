@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 35,
+                    horizontal: 30,
                     vertical: 45,
                   ),
                   child: Column(

@@ -64,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   Positioned(
                     top: 20,
-                    left: 35,
+                    left: 30,
                     child: Container(
                       width: 42,
                       height: 42,
@@ -98,7 +98,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 35,
+                    horizontal: 30,
                     vertical: 45,
                   ),
                   child: Column(
