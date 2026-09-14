@@ -152,6 +152,72 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> deletePost(Map post) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Hapus Postingan',
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: const Text(
+            'Apakah kamu yakin ingin menghapus postingan ini?',
+            style: TextStyle(fontFamily: 'PlusJakartaSans', fontSize: 12),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text(
+                'Batal',
+                style: TextStyle(fontFamily: 'PlusJakartaSans'),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text(
+                'Hapus',
+                style: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    final success = await PostService.deletePost(post['id']);
+
+    if (!mounted) return;
+
+    if (success) {
+      await getProfileData();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Postingan berhasil dihapus')),
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Postingan gagal dihapus')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -538,6 +604,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
                         if (value == 'Pulihkan') {
                           await changePostStatus(post, 'published');
+                          return;
+                        }
+
+                        if (value == 'Hapus') {
+                          await deletePost(post);
                           return;
                         }
                       },
