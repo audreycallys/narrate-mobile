@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:narrate_blog/constants/app_colors.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,13 +10,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int currentCarousel = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -73,6 +76,64 @@ class _HomePageState extends State<HomePage> {
                     borderSide: BorderSide.none,
                   ),
                 ),
+              ),
+
+              const SizedBox(height: 20),
+
+              CarouselSlider(
+                options: CarouselOptions(
+                  height: 155,
+                  viewportFraction: 1,
+                  autoPlay: true,
+                  enlargeCenterPage: false,
+                  onPageChanged: (index, reason) {
+                    setState(() {
+                      currentCarousel = index;
+                    });
+                  },
+                ),
+                items: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 15),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (index) {
+                  return Container(
+                    width: 7,
+                    height: 7,
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: currentCarousel == index
+                          ? AppColors.primary
+                          : Colors.grey.shade300,
+                    ),
+                  );
+                }),
               ),
             ],
           ),
