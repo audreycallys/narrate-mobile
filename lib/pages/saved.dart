@@ -15,6 +15,7 @@ class SavedPage extends StatefulWidget {
 
 class _SavedPageState extends State<SavedPage> {
   List savedPosts = [];
+
   bool isLoading = true;
 
   Future<void> getSavedPosts() async {
@@ -53,12 +54,17 @@ class _SavedPageState extends State<SavedPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Artikel dihapus dari tersimpan')),
       );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Artikel gagal dihapus dari tersimpan')),
+      );
     }
   }
 
   @override
   void initState() {
     super.initState();
+
     getSavedPosts();
   }
 
@@ -105,9 +111,7 @@ class _SavedPageState extends State<SavedPage> {
                                 color: AppColors.primary,
                               ),
                             ),
-
                             SizedBox(height: 15),
-
                             Text(
                               'Belum ada artikel tersimpan',
                               style: TextStyle(
@@ -125,7 +129,28 @@ class _SavedPageState extends State<SavedPage> {
                         itemBuilder: (context, index) {
                           final saved = savedPosts[index];
 
-                          final post = saved['post'] ?? saved;
+                          final nestedPost = saved['post'];
+
+                          final Map<String, dynamic> post = nestedPost is Map
+                              ? Map<String, dynamic>.from(nestedPost)
+                              : Map<String, dynamic>.from(saved);
+
+                          // PENTING:
+                          // Utamakan postId dari saved.
+                          // Jangan sampai memakai ID
+                          // record saved sebagai ID artikel.
+                          final rawPostId = saved['postId'] ?? post['id'];
+
+                          final int? postId = rawPostId is int
+                              ? rawPostId
+                              : int.tryParse(rawPostId?.toString() ?? '');
+
+                          final Map<String, dynamic> detailPost =
+                              Map<String, dynamic>.from(post);
+
+                          if (postId != null) {
+                            detailPost['id'] = postId;
+                          }
 
                           return ArticleCard(
                             imageUrl: post['imageUrl'] ?? '',
@@ -134,35 +159,52 @@ class _SavedPageState extends State<SavedPage> {
                             content: post['content'] ?? '',
                             isSaved: true,
 
+                            // BOOKMARK DI CARD SAVED
                             onBookmarkTap: () {
-                              final postId = post['id'] ?? saved['postId'];
-
                               if (postId != null) {
                                 removeSavedPost(postId);
                               }
                             },
 
+                            // BUKA DETAIL
                             onTap: () async {
+                              if (postId == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('ID artikel tidak ditemukan'),
+                                  ),
+                                );
+
+                                return;
+                              }
+
                               final categories =
                                   await CategoryService.getCategories();
 
                               final category = categories.firstWhere(
                                 (category) =>
-                                    category['id'] == post['categoryId'],
+                                    category['id'] == detailPost['categoryId'],
                                 orElse: () => {'name': 'Artikel'},
                               );
 
-                              if (!context.mounted) return;
+                              if (!context.mounted) {
+                                return;
+                              }
 
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => DetailArticlePage(
-                                    post: post,
+                                    post: detailPost,
                                     categoryName: category['name'],
+                                    initiallySaved: true,
                                   ),
                                 ),
                               );
+
+                              if (!mounted) {
+                                return;
+                              }
 
                               await getSavedPosts();
                             },

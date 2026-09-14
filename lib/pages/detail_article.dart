@@ -8,11 +8,13 @@ import 'package:narrate_blog/services/post_service.dart';
 class DetailArticlePage extends StatefulWidget {
   final Map post;
   final String categoryName;
+  final bool initiallySaved;
 
   const DetailArticlePage({
     super.key,
     required this.post,
     required this.categoryName,
+    this.initiallySaved = false,
   });
 
   @override
@@ -216,6 +218,12 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
   @override
   void initState() {
     super.initState();
+
+    // Kalau dibuka dari halaman Tersimpan,
+    // bookmark langsung tampil aktif.
+    isSaved = widget.initiallySaved;
+
+    // Tetap cek ke backend supaya status sinkron.
     checkSavedStatus();
   }
 
@@ -266,9 +274,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
 
                         Row(
                           children: [
-                            // =========================
                             // BOOKMARK
-                            // =========================
                             InkWell(
                               onTap: isSaving ? null : saveArticle,
                               borderRadius: BorderRadius.circular(50),
