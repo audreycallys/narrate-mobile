@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:narrate_blog/pages/category_page.dart';
 import 'package:narrate_blog/widgets/bottom_nav.dart';
 import 'package:narrate_blog/pages/home_page.dart';
 
@@ -14,31 +15,19 @@ class _MainPageState extends State<MainPage> {
 
   final List<Widget> pages = const [
     HomePage(),
+    CategoryPage(),
 
-    Center(
-      child: Text('Category Page'),
-    ),
+    Center(child: Text('Create Page')),
 
-    Center(
-      child: Text('Create Page'),
-    ),
+    Center(child: Text('Saved Page')),
 
-    Center(
-      child: Text('Saved Page'),
-    ),
-
-    Center(
-      child: Text('Profile Page'),
-    ),
+    Center(child: Text('Profile Page')),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: selectedIndex,
-        children: pages,
-      ),
+      body: IndexedStack(index: selectedIndex, children: pages),
 
       bottomNavigationBar: BottomNav(
         selectedIndex: selectedIndex,
