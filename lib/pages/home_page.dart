@@ -108,42 +108,67 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 20),
 
-              CarouselSlider(
-                options: CarouselOptions(
-                  height: 155,
-                  viewportFraction: 1,
-                  autoPlay: true,
-                  enlargeCenterPage: false,
-                  onPageChanged: (index, reason) {
-                    setState(() {
-                      currentCarousel = index;
-                    });
-                  },
+              if (posts.isEmpty)
+                const SizedBox(
+                  height: 185,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else
+                CarouselSlider(
+                  options: CarouselOptions(
+                    height: 185,
+                    viewportFraction: 1,
+                    autoPlay: true,
+                    enlargeCenterPage: false,
+                    onPageChanged: (index, reason) {
+                      setState(() {
+                        currentCarousel = index;
+                      });
+                    },
+                  ),
+                  items: posts.take(3).map((post) {
+                    return Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(post['imageUrl'], fit: BoxFit.cover),
+
+                            Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [Colors.transparent, Colors.black87],
+                                ),
+                              ),
+                            ),
+
+                            Positioned(
+                              left: 18,
+                              right: 18,
+                              bottom: 16,
+                              child: Text(
+                                post['title'],
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: 'PlusJakartaSans',
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
-                items: [
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.blueGrey,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                ],
-              ),
 
               const SizedBox(height: 15),
 
