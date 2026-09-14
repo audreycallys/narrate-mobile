@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+
 import 'package:narrate_blog/pages/category_page.dart';
-import 'package:narrate_blog/widgets/bottom_nav.dart';
+import 'package:narrate_blog/pages/create_post_page.dart';
 import 'package:narrate_blog/pages/home_page.dart';
+import 'package:narrate_blog/widgets/bottom_nav.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -13,25 +15,39 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int selectedIndex = 0;
 
-  final List<Widget> pages = const [
-    HomePage(),
-    CategoryPage(),
-
-    Center(child: Text('Create Page')),
-
-    Center(child: Text('Saved Page')),
-
-    Center(child: Text('Profile Page')),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      const HomePage(),
+
+      const CategoryPage(),
+
+      // index 2 tidak dipakai sebagai halaman tab,
+      // karena tombol + membuka halaman Create menggunakan Navigator
+      const SizedBox(),
+
+      const Center(child: Text('Saved Page')),
+
+      const Center(child: Text('Profile Page')),
+    ];
+
     return Scaffold(
       body: IndexedStack(index: selectedIndex, children: pages),
 
       bottomNavigationBar: BottomNav(
         selectedIndex: selectedIndex,
         onTap: (index) {
+          // TOMBOL CREATE
+          if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CreatePostPage()),
+            );
+
+            return;
+          }
+
+          // HOME, CATEGORY, SAVED, PROFILE
           setState(() {
             selectedIndex = index;
           });
