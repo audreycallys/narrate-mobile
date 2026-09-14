@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:narrate_blog/services/post_service.dart';
+import 'package:narrate_blog/widgets/article_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,6 +30,34 @@ class _HomePageState extends State<HomePage> {
     getPosts();
   }
 
+  String formatDate(String createdAt) {
+    final date = DateTime.parse(createdAt).toLocal();
+
+    const months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  int calculateReadingTime(String content) {
+    final wordCount = content.trim().split(RegExp(r'\s+')).length;
+    final minutes = (wordCount / 200).ceil();
+
+    return minutes < 1 ? 1 : minutes;
+  }
+
   @override
   Widget build(BuildContext context) {
     final popularPosts = [...posts];
@@ -42,7 +71,7 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+            padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -155,17 +184,35 @@ class _HomePageState extends State<HomePage> {
                               Positioned(
                                 left: 18,
                                 right: 18,
-                                bottom: 16,
-                                child: Text(
-                                  post['title'],
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                  ),
+                                bottom: 14,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      post['title'],
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontFamily: 'PlusJakartaSans',
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 5),
+
+                                    Text(
+                                      '${formatDate(post['createdAt'])} • '
+                                      '${calculateReadingTime(post['content'])} Menit Baca',
+                                      style: const TextStyle(
+                                        fontFamily: 'PlusJakartaSans',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -211,7 +258,7 @@ class _HomePageState extends State<HomePage> {
 
                 if (posts.isNotEmpty)
                   SizedBox(
-                    height: 125,
+                    height: 140,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: popularPosts.length > 5
@@ -224,7 +271,7 @@ class _HomePageState extends State<HomePage> {
                         final post = popularPosts[index];
 
                         return SizedBox(
-                          width: 125,
+                          width: 140,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Stack(
@@ -252,21 +299,77 @@ class _HomePageState extends State<HomePage> {
                                   left: 8,
                                   right: 8,
                                   bottom: 8,
-                                  child: Text(
-                                    post['title'],
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'PlusJakartaSans',
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        post['title'],
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontFamily: 'PlusJakartaSans',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 4),
+
+                                      Text(
+                                        '${formatDate(post['createdAt'])} • '
+                                        '${calculateReadingTime(post['content'])} Menit Baca',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontFamily: 'PlusJakartaSans',
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                        );
+                      },
+                    ),
+                  ),
+
+                const SizedBox(height: 25),
+
+                const Text(
+                  'Artikel Terbaru',
+                  style: TextStyle(
+                    fontFamily: 'PlusJakartaSans',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black,
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                if (posts.isNotEmpty)
+                  Column(
+                    children: List.generate(
+                      posts.length > 5 ? 5 : posts.length,
+                      (index) {
+                        final post = posts[index];
+
+                        return ArticleCard(
+                          imageUrl: post['imageUrl'],
+                          title: post['title'],
+                          createdAt: post['createdAt'],
+                          content: post['content'],
+                          isSaved: false,
+                          onBookmarkTap: () {
+                            print('Bookmark artikel ${post['id']}');
+                          },
                         );
                       },
                     ),
