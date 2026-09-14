@@ -57,4 +57,33 @@ class PostService {
 
     throw Exception('Data artikel gagal diambil');
   }
+
+  static Future<bool> updatePost({
+    required int postId,
+    required String title,
+    required String content,
+    required int categoryId,
+    required String status,
+    required List<int> tagIds,
+    String? imagePath,
+  }) async {
+    final request = http.MultipartRequest(
+      'PUT',
+      Uri.parse('https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts/$postId'),
+    );
+
+    request.fields['title'] = title;
+    request.fields['content'] = content;
+    request.fields['categoryId'] = categoryId.toString();
+    request.fields['status'] = status;
+    request.fields['tagIds'] = jsonEncode(tagIds);
+
+    if (imagePath != null) {
+      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+    }
+
+    final response = await request.send();
+
+    return response.statusCode == 200;
+  }
 }
