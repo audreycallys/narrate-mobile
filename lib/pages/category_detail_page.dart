@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'package:narrate_blog/pages/detail_article_page.dart';
 import 'package:narrate_blog/services/post_service.dart';
+import 'package:narrate_blog/services/saved_service.dart';
 import 'package:narrate_blog/widgets/article_card.dart';
 
 class CategoryDetailPage extends StatefulWidget {
@@ -20,6 +22,8 @@ class CategoryDetailPage extends StatefulWidget {
 class _CategoryDetailPageState extends State<CategoryDetailPage> {
   List posts = [];
 
+  Set<int> savedPostIds = {};
+
   Future<void> getPosts() async {
     final result = await PostService.getPosts();
 
@@ -27,15 +31,69 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
       return post['categoryId'] == widget.categoryId;
     }).toList();
 
+    if (!mounted) return;
+
     setState(() {
       posts = filteredPosts;
     });
   }
 
+  Future<void> getSavedPosts() async {
+    final savedPosts = await SavedService.getSavedPosts();
+
+    if (!mounted) return;
+
+    setState(() {
+      savedPostIds = savedPosts.map<int>((saved) {
+        final post = saved['post'] ?? saved;
+
+        return post['id'] ?? saved['postId'];
+      }).toSet();
+    });
+  }
+
+  Future<void> toggleSaved(Map post) async {
+    final int postId = post['id'];
+
+    final bool alreadySaved = savedPostIds.contains(postId);
+
+    bool success;
+
+    if (alreadySaved) {
+      success = await SavedService.deleteSavedPost(postId);
+    } else {
+      success = await SavedService.savePost(postId);
+    }
+
+    if (!mounted) return;
+
+    if (success) {
+      setState(() {
+        if (alreadySaved) {
+          savedPostIds.remove(postId);
+        } else {
+          savedPostIds.add(postId);
+        }
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            alreadySaved
+                ? 'Artikel dihapus dari tersimpan'
+                : 'Artikel berhasil disimpan',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
     getPosts();
+    getSavedPosts();
   }
 
   @override
@@ -72,7 +130,6 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                       ),
                     ),
                   ),
-
                   Text(
                     widget.categoryName,
                     style: const TextStyle(
@@ -121,10 +178,11 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                             title: post['title'],
                             createdAt: post['createdAt'],
                             content: post['content'],
-                            isSaved: false,
 
-                            onTap: () {
-                              Navigator.push(
+                            isSaved: savedPostIds.contains(post['id']),
+
+                            onTap: () async {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => DetailArticlePage(
@@ -133,10 +191,12 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                                   ),
                                 ),
                               );
+
+                              await getSavedPosts();
                             },
 
                             onBookmarkTap: () {
-                              print('Bookmark artikel ${post['id']}');
+                              toggleSaved(post);
                             },
                           );
                         },

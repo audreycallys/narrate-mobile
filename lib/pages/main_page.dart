@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:narrate_blog/pages/category_page.dart';
 import 'package:narrate_blog/pages/create_post_page.dart';
 import 'package:narrate_blog/pages/home_page.dart';
+import 'package:narrate_blog/pages/saved_page.dart';
 import 'package:narrate_blog/widgets/bottom_nav.dart';
 
 class MainPage extends StatefulWidget {
@@ -14,11 +15,13 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int selectedIndex = 0;
+  int savedRefreshKey = 0;
+  int homeRefreshKey = 0;
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      const HomePage(),
+      HomePage(key: ValueKey(homeRefreshKey)),
 
       const CategoryPage(),
 
@@ -26,7 +29,7 @@ class _MainPageState extends State<MainPage> {
       // karena tombol + membuka halaman Create menggunakan Navigator
       const SizedBox(),
 
-      const Center(child: Text('Saved Page')),
+      SavedPage(key: ValueKey(savedRefreshKey)),
 
       const Center(child: Text('Profile Page')),
     ];
@@ -37,6 +40,15 @@ class _MainPageState extends State<MainPage> {
       bottomNavigationBar: BottomNav(
         selectedIndex: selectedIndex,
         onTap: (index) {
+          // HOME
+          if (index == 0) {
+            setState(() {
+              homeRefreshKey++;
+              selectedIndex = index;
+            });
+
+            return;
+          }
           // TOMBOL CREATE
           if (index == 2) {
             Navigator.push(
@@ -47,7 +59,17 @@ class _MainPageState extends State<MainPage> {
             return;
           }
 
-          // HOME, CATEGORY, SAVED, PROFILE
+          // SAVED
+          if (index == 3) {
+            setState(() {
+              savedRefreshKey++;
+              selectedIndex = index;
+            });
+
+            return;
+          }
+
+          // CATEGORY, PROFILE
           setState(() {
             selectedIndex = index;
           });

@@ -6,6 +6,7 @@ import 'package:narrate_blog/pages/detail_article_page.dart';
 import 'package:narrate_blog/services/category_service.dart';
 import 'package:narrate_blog/services/post_service.dart';
 import 'package:narrate_blog/widgets/article_card.dart';
+import 'package:narrate_blog/services/saved_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,12 +37,64 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Set<int> savedPostIds = {};
+
+  Future<void> getSavedPosts() async {
+    final savedPosts = await SavedService.getSavedPosts();
+
+    if (!mounted) return;
+
+    setState(() {
+      savedPostIds = savedPosts.map<int>((saved) {
+        final post = saved['post'] ?? saved;
+
+        return post['id'] ?? saved['postId'];
+      }).toSet();
+    });
+  }
+
+  Future<void> toggleSaved(Map post) async {
+    final int postId = post['id'];
+    final bool alreadySaved = savedPostIds.contains(postId);
+
+    bool success;
+
+    if (alreadySaved) {
+      success = await SavedService.deleteSavedPost(postId);
+    } else {
+      success = await SavedService.savePost(postId);
+    }
+
+    if (!mounted) return;
+
+    if (success) {
+      setState(() {
+        if (alreadySaved) {
+          savedPostIds.remove(postId);
+        } else {
+          savedPostIds.add(postId);
+        }
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            alreadySaved
+                ? 'Artikel dihapus dari tersimpan'
+                : 'Artikel berhasil disimpan',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
 
     getPosts();
     getCategories();
+    getSavedPosts();
   }
 
   String getCategoryName(int categoryId) {
@@ -179,8 +232,8 @@ class _HomePageState extends State<HomePage> {
                     ),
                     items: posts.take(3).map((post) {
                       return InkWell(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => DetailArticlePage(
@@ -191,6 +244,8 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           );
+
+                          await getSavedPosts();
                         },
                         borderRadius: BorderRadius.circular(16),
                         child: Container(
@@ -311,8 +366,8 @@ class _HomePageState extends State<HomePage> {
                         final post = popularPosts[index];
 
                         return InkWell(
-                          onTap: () {
-                            Navigator.push(
+                          onTap: () async {
+                            await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => DetailArticlePage(
@@ -323,6 +378,8 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             );
+
+                            await getSavedPosts();
                           },
                           borderRadius: BorderRadius.circular(12),
                           child: SizedBox(
@@ -420,10 +477,10 @@ class _HomePageState extends State<HomePage> {
                         title: post['title'],
                         createdAt: post['createdAt'],
                         content: post['content'],
-                        isSaved: false,
+                        isSaved: savedPostIds.contains(post['id']),
 
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => DetailArticlePage(
@@ -434,10 +491,11 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           );
-                        },
 
+                          getSavedPosts();
+                        },
                         onBookmarkTap: () {
-                          print('Bookmark artikel ${post['id']}');
+                          toggleSaved(post);
                         },
                       );
                     }),
