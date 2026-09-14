@@ -118,7 +118,7 @@ class ArticleCard extends StatelessWidget {
               const SizedBox(width: 8),
 
               Padding(
-                padding: const EdgeInsets.only(top: 20),
+                padding: const EdgeInsets.only(top: 18),
                 child: InkWell(
                   onTap: onBookmarkTap,
                   child: Icon(
