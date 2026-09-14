@@ -18,6 +18,7 @@ class _MainPageState extends State<MainPage> {
   int selectedIndex = 0;
   int savedRefreshKey = 0;
   int homeRefreshKey = 0;
+  int categoryRefreshKey = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +32,7 @@ class _MainPageState extends State<MainPage> {
         },
       ),
 
-      const CategoryPage(),
+      CategoryPage(key: ValueKey(categoryRefreshKey)),
 
       // index 2 tidak dipakai sebagai halaman tab,
       // karena tombol + membuka halaman Create menggunakan Navigator
@@ -57,6 +58,16 @@ class _MainPageState extends State<MainPage> {
 
             return;
           }
+
+          // CATEGORY
+          if (index == 1) {
+            setState(() {
+              categoryRefreshKey++;
+              selectedIndex = index;
+            });
+            return;
+          }
+
           // TOMBOL CREATE
           if (index == 2) {
             Navigator.push(
@@ -77,7 +88,7 @@ class _MainPageState extends State<MainPage> {
             return;
           }
 
-          // CATEGORY, PROFILE
+          // PROFILE
           setState(() {
             selectedIndex = index;
           });
