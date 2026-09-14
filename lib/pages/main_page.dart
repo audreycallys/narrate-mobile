@@ -19,6 +19,7 @@ class _MainPageState extends State<MainPage> {
   int savedRefreshKey = 0;
   int homeRefreshKey = 0;
   int categoryRefreshKey = 0;
+  int profileRefreshKey = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +41,7 @@ class _MainPageState extends State<MainPage> {
 
       SavedPage(key: ValueKey(savedRefreshKey)),
 
-      const ProfilePage(),
+      ProfilePage(key: ValueKey(profileRefreshKey)),
     ];
 
     return Scaffold(
@@ -89,6 +90,14 @@ class _MainPageState extends State<MainPage> {
           }
 
           // PROFILE
+          if (index == 4) {
+            setState(() {
+              profileRefreshKey++;
+              selectedIndex = index;
+            });
+            return;
+          }
+
           setState(() {
             selectedIndex = index;
           });
