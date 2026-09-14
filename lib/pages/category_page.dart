@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:narrate_blog/services/category_service.dart';
+import 'package:narrate_blog/services/post_service.dart';
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key});
@@ -10,31 +11,122 @@ class CategoryPage extends StatefulWidget {
 
 class _CategoryPageState extends State<CategoryPage> {
   List categories = [];
+  List posts = [];
 
-  Future<void> getCategories() async {
-    final result = await CategoryService.getCategories();
+  Future<void> getData() async {
+    final categoryResult = await CategoryService.getCategories();
+    final postResult = await PostService.getPosts();
 
     setState(() {
-      categories = result;
+      categories = categoryResult;
+      posts = postResult;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    getCategories();
+    getData();
   }
 
-  final List<Color> categoryColors = const [
-    Color(0xFFE4F4F6),
-    Color(0xFFFFF1D9),
-    Color(0xFFF4E6FF),
-    Color(0xFFE6F5E9),
-    Color(0xFFFFE8E8),
-    Color(0xFFE5EEFF),
-    Color(0xFFFFF0E5),
-    Color(0xFFE8E8F8),
-  ];
+  int getArticleCount(int categoryId) {
+    return posts.where((post) {
+      return post['categoryId'] == categoryId;
+    }).length;
+  }
+
+  IconData getCategoryIcon(String name) {
+    switch (name) {
+      case 'Teknologi':
+        return Icons.laptop_mac_outlined;
+
+      case 'Pendidikan':
+        return Icons.school_outlined;
+
+      case 'Gaya Hidup':
+        return Icons.wb_sunny_outlined;
+
+      case 'Kesehatan':
+        return Icons.favorite_border;
+
+      case 'Makanan':
+        return Icons.restaurant_outlined;
+
+      case 'Perjalanan':
+        return Icons.flight_outlined;
+
+      case 'Bisnis':
+        return Icons.business_center_outlined;
+
+      case 'Desain':
+        return Icons.palette_outlined;
+
+      default:
+        return Icons.article_outlined;
+    }
+  }
+
+  Color getCategoryColor(String name) {
+    switch (name) {
+      case 'Teknologi':
+        return const Color(0xFFEDE3FA);
+
+      case 'Pendidikan':
+        return const Color(0xFFFFE5EA);
+
+      case 'Gaya Hidup':
+        return const Color(0xFFF8E2F1);
+
+      case 'Kesehatan':
+        return const Color(0xFFE4F4E6);
+
+      case 'Makanan':
+        return const Color(0xFFF6F3D9);
+
+      case 'Perjalanan':
+        return const Color(0xFFE2EBFA);
+
+      case 'Bisnis':
+        return const Color(0xFFFFE8DF);
+
+      case 'Desain':
+        return const Color(0xFFECE3F6);
+
+      default:
+        return const Color(0xFFF2F2F2);
+    }
+  }
+
+  Color getCategoryIconColor(String name) {
+    switch (name) {
+      case 'Teknologi':
+        return const Color(0xFF9A6BC3);
+
+      case 'Pendidikan':
+        return const Color(0xFFE88698);
+
+      case 'Gaya Hidup':
+        return const Color(0xFFD781B5);
+
+      case 'Kesehatan':
+        return const Color(0xFF72B77B);
+
+      case 'Makanan':
+        return const Color(0xFFC5B852);
+
+      case 'Perjalanan':
+        return const Color(0xFF759ACD);
+
+      case 'Bisnis':
+        return const Color(0xFFD58A70);
+
+      case 'Desain':
+        return const Color(0xFF9C78BE);
+
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +134,7 @@ class _CategoryPageState extends State<CategoryPage> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
+          padding: const EdgeInsets.fromLTRB(30, 30, 30, 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -56,19 +148,7 @@ class _CategoryPageState extends State<CategoryPage> {
                 ),
               ),
 
-              const SizedBox(height: 5),
-
-              const Text(
-                'Temukan artikel berdasarkan topik yang kamu suka.',
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.grey,
-                ),
-              ),
-
-              const SizedBox(height: 25),
+              const SizedBox(height: 15),
 
               Expanded(
                 child: categories.isEmpty
@@ -78,31 +158,64 @@ class _CategoryPageState extends State<CategoryPage> {
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
-                              crossAxisSpacing: 15,
-                              mainAxisSpacing: 15,
-                              childAspectRatio: 1.35,
+                              crossAxisSpacing: 18,
+                              mainAxisSpacing: 18,
+                              childAspectRatio: 1.10,
                             ),
                         itemBuilder: (context, index) {
                           final category = categories[index];
 
+                          final articleCount = getArticleCount(category['id']);
+
                           return Container(
-                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color:
-                                  categoryColors[index % categoryColors.length],
-                              borderRadius: BorderRadius.circular(18),
+                              color: getCategoryColor(category['name']),
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            child: Align(
-                              alignment: Alignment.bottomLeft,
-                              child: Text(
-                                category['name'],
-                                style: const TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 58,
+                                  height: 58,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0x66FFFFFF),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Icon(
+                                    getCategoryIcon(category['name']),
+                                    size: 34,
+                                    color: getCategoryIconColor(
+                                      category['name'],
+                                    ),
+                                  ),
                                 ),
-                              ),
+
+                                const SizedBox(height: 14),
+
+                                Text(
+                                  category['name'],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 4),
+
+                                Text(
+                                  '$articleCount Artikel',
+                                  style: const TextStyle(
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF7B7B7B),
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         },
