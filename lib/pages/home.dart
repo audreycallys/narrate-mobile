@@ -7,15 +7,20 @@ import 'package:narrate_blog/services/category_service.dart';
 import 'package:narrate_blog/services/post_service.dart';
 import 'package:narrate_blog/widgets/article_card.dart';
 import 'package:narrate_blog/services/saved_service.dart';
+import 'package:narrate_blog/services/profile_service.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final VoidCallback? onProfileTap;
+
+  const HomePage({super.key, this.onProfileTap});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  Map profile = {};
+
   int currentCarousel = 0;
 
   List posts = [];
@@ -88,6 +93,20 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> getProfile() async {
+    try {
+      final result = await ProfileService.getProfile();
+
+      if (!mounted) return;
+
+      setState(() {
+        profile = result;
+      });
+    } catch (e) {
+      // tidak perlu snackbar supaya Home tidak terganggu
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -95,6 +114,7 @@ class _HomePageState extends State<HomePage> {
     getPosts();
     getCategories();
     getSavedPosts();
+    getProfile();
   }
 
   String getCategoryName(int categoryId) {
@@ -154,20 +174,22 @@ class _HomePageState extends State<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Halo, Sakezza Labiru!',
-                          style: TextStyle(
+                          'Halo, ${profile['name'] ?? 'Pengguna'}!',
+                          style: const TextStyle(
                             fontFamily: 'PlusJakartaSans',
-                            fontSize: 24,
+                            fontSize: 20,
                             fontWeight: FontWeight.w800,
                             color: Colors.black,
                           ),
                         ),
-                        SizedBox(height: 3),
-                        Text(
+
+                        const SizedBox(height: 3),
+
+                        const Text(
                           'Ada cerita apa hari ini?',
                           style: TextStyle(
                             fontFamily: 'PlusJakartaSans',
@@ -179,9 +201,23 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
 
-                    const CircleAvatar(
-                      radius: 24,
-                      backgroundColor: AppColors.primary,
+                    InkWell(
+                      onTap: widget.onProfileTap,
+                      borderRadius: BorderRadius.circular(50),
+                      child: CircleAvatar(
+                        radius: 22,
+                        backgroundColor: const Color(0xFFDDF3F5),
+                        backgroundImage:
+                            profile['imageUrl'] != null &&
+                                profile['imageUrl'].toString().isNotEmpty
+                            ? NetworkImage(profile['imageUrl'].toString())
+                            : null,
+                        child:
+                            profile['imageUrl'] == null ||
+                                profile['imageUrl'].toString().isEmpty
+                            ? const Icon(Icons.person, color: AppColors.primary)
+                            : null,
+                      ),
                     ),
                   ],
                 ),

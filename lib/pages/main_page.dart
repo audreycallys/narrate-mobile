@@ -22,7 +22,14 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomePage(key: ValueKey(homeRefreshKey)),
+      HomePage(
+        key: ValueKey(homeRefreshKey),
+        onProfileTap: () {
+          setState(() {
+            selectedIndex = 4;
+          });
+        },
+      ),
 
       const CategoryPage(),
 
