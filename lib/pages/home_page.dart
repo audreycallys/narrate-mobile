@@ -161,22 +161,23 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 15),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (index) {
-                  return Container(
-                    width: 7,
-                    height: 7,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: currentCarousel == index
-                          ? AppColors.primary
-                          : Colors.grey.shade300,
-                    ),
-                  );
-                }),
-              ),
+              if (posts.isNotEmpty)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(posts.take(3).length, (index) {
+                    return Container(
+                      width: 7,
+                      height: 7,
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: currentCarousel == index
+                            ? AppColors.primary
+                            : Colors.grey.shade300,
+                      ),
+                    );
+                  }),
+                ),
             ],
           ),
         ),
