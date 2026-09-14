@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 import 'package:narrate_blog/constants/app_colors.dart';
-import 'package:narrate_blog/pages/detail_article_page.dart';
+import 'package:narrate_blog/pages/detail_article.dart';
 import 'package:narrate_blog/services/category_service.dart';
 import 'package:narrate_blog/services/post_service.dart';
 import 'package:narrate_blog/widgets/article_card.dart';

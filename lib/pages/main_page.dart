@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:narrate_blog/pages/category_page.dart';
-import 'package:narrate_blog/pages/create_post_page.dart';
-import 'package:narrate_blog/pages/home_page.dart';
-import 'package:narrate_blog/pages/saved_page.dart';
+import 'package:narrate_blog/pages/category.dart';
+import 'package:narrate_blog/pages/create_post.dart';
+import 'package:narrate_blog/pages/home.dart';
+import 'package:narrate_blog/pages/profile.dart';
+import 'package:narrate_blog/pages/saved.dart';
 import 'package:narrate_blog/widgets/bottom_nav.dart';
 
 class MainPage extends StatefulWidget {
@@ -31,7 +32,7 @@ class _MainPageState extends State<MainPage> {
 
       SavedPage(key: ValueKey(savedRefreshKey)),
 
-      const Center(child: Text('Profile Page')),
+      const ProfilePage(),
     ];
 
     return Scaffold(

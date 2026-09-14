@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:narrate_blog/pages/detail_article_page.dart';
+import 'package:narrate_blog/pages/detail_article.dart';
 import 'package:narrate_blog/services/post_service.dart';
 import 'package:narrate_blog/services/saved_service.dart';
 import 'package:narrate_blog/widgets/article_card.dart';

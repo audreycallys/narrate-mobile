@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:narrate_blog/services/category_service.dart';
 import 'package:narrate_blog/services/post_service.dart';
-import 'package:narrate_blog/pages/category_detail_page.dart';
+import 'package:narrate_blog/pages/category_detail.dart';
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key});
