@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:narrate_blog/constants/app_colors.dart';
+import 'package:narrate_blog/pages/home_page.dart';
 import 'package:narrate_blog/pages/register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -234,6 +235,13 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () {
                             print(emailController.text);
                             print(passwordController.text);
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomePage(),
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
