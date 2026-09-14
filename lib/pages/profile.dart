@@ -4,6 +4,7 @@ import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/pages/edit_profile.dart';
 import 'package:narrate_blog/services/post_service.dart';
 import 'package:narrate_blog/services/profile_service.dart';
+import 'package:narrate_blog/pages/edit_post.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -108,6 +109,47 @@ class _ProfilePageState extends State<ProfilePage> {
     final minutes = (wordCount / 200).ceil();
 
     return minutes < 1 ? 1 : minutes;
+  }
+
+  Future<void> changePostStatus(Map post, String newStatus) async {
+    final postTags = post['tags'] ?? [];
+
+    final List<int> tagIds = postTags
+        .map<int>((tag) => tag['id'] as int)
+        .toList();
+
+    final success = await PostService.updatePost(
+      postId: post['id'],
+      title: post['title'],
+      content: post['content'],
+      categoryId: post['categoryId'],
+      status: newStatus,
+      tagIds: tagIds,
+    );
+
+    if (!mounted) return;
+
+    if (success) {
+      await getProfileData();
+
+      String message = '';
+
+      if (newStatus == 'archived') {
+        message = 'Postingan berhasil diarsipkan';
+      } else {
+        message = 'Postingan berhasil dipublikasikan';
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Status postingan gagal diubah')),
+      );
+    }
   }
 
   @override
@@ -468,14 +510,36 @@ class _ProfilePageState extends State<ProfilePage> {
                         size: 22,
                         color: Color(0xFF1E919E),
                       ),
-                      onSelected: (value) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '$value akan kita sambungkan pada tahap berikutnya',
+                      onSelected: (value) async {
+                        if (value == 'Edit') {
+                          final updated = await Navigator.push<bool>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditPostPage(post: post),
                             ),
-                          ),
-                        );
+                          );
+
+                          if (updated == true) {
+                            await getProfileData();
+                          }
+
+                          return;
+                        }
+
+                        if (value == 'Arsipkan') {
+                          await changePostStatus(post, 'archived');
+                          return;
+                        }
+
+                        if (value == 'Publikasikan') {
+                          await changePostStatus(post, 'published');
+                          return;
+                        }
+
+                        if (value == 'Pulihkan') {
+                          await changePostStatus(post, 'published');
+                          return;
+                        }
                       },
                       itemBuilder: (context) {
                         if (status == 'published') {

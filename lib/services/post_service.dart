@@ -86,4 +86,12 @@ class PostService {
 
     return response.statusCode == 200;
   }
+
+  static Future<bool> deletePost(int postId) async {
+    final response = await http.delete(
+      Uri.parse('https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts/$postId'),
+    );
+
+    return response.statusCode == 200 || response.statusCode == 204;
+  }
 }
