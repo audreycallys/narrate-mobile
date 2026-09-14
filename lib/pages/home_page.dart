@@ -15,7 +15,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
                         'Halo, Sakezza Labiru!',
                         style: TextStyle(
                           fontFamily: 'PlusJakartaSans',
-                          fontSize: 22,
+                          fontSize: 24,
                           fontWeight: FontWeight.w800,
                           color: Colors.black,
                         ),
@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
                         'Ada cerita apa hari ini?',
                         style: TextStyle(
                           fontFamily: 'PlusJakartaSans',
-                          fontSize: 13,
+                          fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: Colors.black,
                         ),
@@ -47,8 +47,32 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
 
-                  CircleAvatar(radius: 22, backgroundColor: AppColors.primary),
+                  CircleAvatar(radius: 24, backgroundColor: AppColors.primary),
                 ],
+              ),
+
+              const SizedBox(height: 20),
+
+              TextField(
+                decoration: InputDecoration(
+                  hintText: 'Cari artikel, kategori, atau topik...',
+                  hintStyle: const TextStyle(
+                    fontFamily: 'PlusJakartaSans',
+                    fontSize: 13,
+                    color: Color.fromARGB(255, 82, 82, 82),
+                  ),
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  filled: true,
+                  fillColor: const Color(0xFFECECEC),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 15,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
               ),
             ],
           ),
