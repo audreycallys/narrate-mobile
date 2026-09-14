@@ -4,9 +4,7 @@ import 'package:http/http.dart' as http;
 class PostService {
   static Future<List> getPosts() async {
     final response = await http.get(
-      Uri.parse(
-        'https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts',
-      ),
+      Uri.parse('https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts'),
     );
 
     if (response.statusCode == 200) {
@@ -16,5 +14,31 @@ class PostService {
     } else {
       throw Exception('Data artikel gagal diambil');
     }
+  }
+
+  static Future<bool> createPost({
+    required String title,
+    required String content,
+    required int categoryId,
+    required String status,
+    required List<int> tagIds,
+    required String imagePath,
+  }) async {
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts'),
+    );
+
+    request.fields['title'] = title;
+    request.fields['content'] = content;
+    request.fields['categoryId'] = categoryId.toString();
+    request.fields['status'] = status;
+    request.fields['tagIds'] = jsonEncode(tagIds);
+
+    request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+
+    final response = await request.send();
+
+    return response.statusCode == 200 || response.statusCode == 201;
   }
 }
