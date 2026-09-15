@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/pages/detail_article.dart';
 import 'package:narrate_blog/services/category_service.dart';
@@ -26,8 +25,12 @@ class _HomePageState extends State<HomePage> {
   List posts = [];
   List categories = [];
 
+  Set<int> savedPostIds = {};
+
   Future<void> getPosts() async {
     final result = await PostService.getPosts();
+
+    if (!mounted) return;
 
     setState(() {
       posts = result;
@@ -37,12 +40,12 @@ class _HomePageState extends State<HomePage> {
   Future<void> getCategories() async {
     final result = await CategoryService.getCategories();
 
+    if (!mounted) return;
+
     setState(() {
       categories = result;
     });
   }
-
-  Set<int> savedPostIds = {};
 
   Future<void> getSavedPosts() async {
     final savedPosts = await SavedService.getSavedPosts();
@@ -60,6 +63,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> toggleSaved(Map post) async {
     final int postId = post['id'];
+
     final bool alreadySaved = savedPostIds.contains(postId);
 
     bool success;
@@ -102,9 +106,27 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         profile = result;
       });
-    } catch (e) {
-      // tidak perlu snackbar supaya Home tidak terganggu
+    } catch (e) {}
+  }
+
+  Future<void> openPostDetail(Map post) async {
+    final changed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailArticlePage(
+          post: post,
+          categoryName: getCategoryName(post['categoryId']),
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (changed == true) {
+      await getPosts();
     }
+
+    await getSavedPosts();
   }
 
   @override
@@ -149,6 +171,7 @@ class _HomePageState extends State<HomePage> {
 
   int calculateReadingTime(String content) {
     final wordCount = content.trim().split(RegExp(r'\s+')).length;
+
     final minutes = (wordCount / 200).ceil();
 
     return minutes < 1 ? 1 : minutes;
@@ -186,9 +209,7 @@ class _HomePageState extends State<HomePage> {
                             color: Colors.black,
                           ),
                         ),
-
                         const SizedBox(height: 3),
-
                         const Text(
                           'Ada cerita apa hari ini?',
                           style: TextStyle(
@@ -200,7 +221,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-
                     InkWell(
                       onTap: widget.onProfileTap,
                       borderRadius: BorderRadius.circular(50),
@@ -221,9 +241,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 20),
-
                 TextField(
                   decoration: InputDecoration(
                     hintText: 'Cari artikel, kategori, atau topik...',
@@ -245,9 +263,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 if (posts.isEmpty)
                   const SizedBox(
                     height: 185,
@@ -269,19 +285,7 @@ class _HomePageState extends State<HomePage> {
                     items: posts.take(3).map((post) {
                       return InkWell(
                         onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailArticlePage(
-                                post: post,
-                                categoryName: getCategoryName(
-                                  post['categoryId'],
-                                ),
-                              ),
-                            ),
-                          );
-
-                          await getSavedPosts();
+                          await openPostDetail(post);
                         },
                         borderRadius: BorderRadius.circular(16),
                         child: Container(
@@ -296,7 +300,6 @@ class _HomePageState extends State<HomePage> {
                                   post['imageUrl'],
                                   fit: BoxFit.cover,
                                 ),
-
                                 Container(
                                   decoration: const BoxDecoration(
                                     gradient: LinearGradient(
@@ -309,7 +312,6 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                                 ),
-
                                 Positioned(
                                   left: 18,
                                   right: 18,
@@ -329,9 +331,7 @@ class _HomePageState extends State<HomePage> {
                                           color: Colors.white,
                                         ),
                                       ),
-
                                       const SizedBox(height: 5),
-
                                       Text(
                                         '${formatDate(post['createdAt'])} • '
                                         '${calculateReadingTime(post['content'])} Menit Baca',
@@ -352,9 +352,7 @@ class _HomePageState extends State<HomePage> {
                       );
                     }).toList(),
                   ),
-
                 const SizedBox(height: 15),
-
                 if (posts.isNotEmpty)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -372,9 +370,7 @@ class _HomePageState extends State<HomePage> {
                       );
                     }),
                   ),
-
                 const SizedBox(height: 25),
-
                 const Text(
                   'Artikel Terpopuler',
                   style: TextStyle(
@@ -384,9 +380,7 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.black,
                   ),
                 ),
-
                 const SizedBox(height: 15),
-
                 if (posts.isNotEmpty)
                   SizedBox(
                     height: 140,
@@ -403,19 +397,7 @@ class _HomePageState extends State<HomePage> {
 
                         return InkWell(
                           onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DetailArticlePage(
-                                  post: post,
-                                  categoryName: getCategoryName(
-                                    post['categoryId'],
-                                  ),
-                                ),
-                              ),
-                            );
-
-                            await getSavedPosts();
+                            await openPostDetail(post);
                           },
                           borderRadius: BorderRadius.circular(12),
                           child: SizedBox(
@@ -429,7 +411,6 @@ class _HomePageState extends State<HomePage> {
                                     post['imageUrl'],
                                     fit: BoxFit.cover,
                                   ),
-
                                   Container(
                                     decoration: const BoxDecoration(
                                       gradient: LinearGradient(
@@ -442,7 +423,6 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                   ),
-
                                   Positioned(
                                     left: 8,
                                     right: 8,
@@ -462,9 +442,7 @@ class _HomePageState extends State<HomePage> {
                                             color: Colors.white,
                                           ),
                                         ),
-
                                         const SizedBox(height: 4),
-
                                         Text(
                                           '${formatDate(post['createdAt'])} • '
                                           '${calculateReadingTime(post['content'])} Menit Baca',
@@ -488,9 +466,7 @@ class _HomePageState extends State<HomePage> {
                       },
                     ),
                   ),
-
                 const SizedBox(height: 25),
-
                 const Text(
                   'Semua Artikel',
                   style: TextStyle(
@@ -500,9 +476,7 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.black,
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 if (posts.isNotEmpty)
                   Column(
                     children: List.generate(posts.length, (index) {
@@ -514,21 +488,8 @@ class _HomePageState extends State<HomePage> {
                         createdAt: post['createdAt'],
                         content: post['content'],
                         isSaved: savedPostIds.contains(post['id']),
-
                         onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailArticlePage(
-                                post: post,
-                                categoryName: getCategoryName(
-                                  post['categoryId'],
-                                ),
-                              ),
-                            ),
-                          );
-
-                          getSavedPosts();
+                          await openPostDetail(post);
                         },
                         onBookmarkTap: () {
                           toggleSaved(post);

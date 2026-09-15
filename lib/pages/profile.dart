@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/pages/edit_profile.dart';
 import 'package:narrate_blog/services/post_service.dart';
 import 'package:narrate_blog/services/profile_service.dart';
 import 'package:narrate_blog/pages/edit_post.dart';
+import 'package:narrate_blog/pages/detail_article.dart';
+import 'package:narrate_blog/services/category_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -21,7 +22,6 @@ class _ProfilePageState extends State<ProfilePage> {
   List archivedPosts = [];
 
   int selectedTab = 0;
-
   bool isLoading = true;
 
   Future<void> getProfileData() async {
@@ -38,11 +38,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
       setState(() {
         profile = profileResult;
-
         publishedPosts = published;
         draftPosts = draft;
         archivedPosts = archived;
-
         isLoading = false;
       });
     } catch (e) {
@@ -109,6 +107,41 @@ class _ProfilePageState extends State<ProfilePage> {
     final minutes = (wordCount / 200).ceil();
 
     return minutes < 1 ? 1 : minutes;
+  }
+
+  Future<void> openPostDetail(Map post) async {
+    try {
+      final categories = await CategoryService.getCategories();
+
+      final category = categories.firstWhere(
+        (category) => category['id'] == post['categoryId'],
+        orElse: () => {'name': 'Artikel'},
+      );
+
+      if (!context.mounted) return;
+
+      final changed = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DetailArticlePage(
+            post: post,
+            categoryName: category['name'] ?? 'Artikel',
+          ),
+        ),
+      );
+
+      if (!mounted) return;
+
+      if (changed == true) {
+        await getProfileData();
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Detail artikel gagal dibuka')),
+      );
+    }
   }
 
   Future<void> changePostStatus(Map post, String newStatus) async {
@@ -240,13 +273,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: Colors.black,
                       ),
                     ),
-
                     const SizedBox(height: 30),
-
                     _buildAvatar(),
-
                     const SizedBox(height: 30),
-
                     Text(
                       profile['name'] ?? 'Nama Pengguna',
                       style: const TextStyle(
@@ -256,9 +285,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: Colors.black,
                       ),
                     ),
-
                     const SizedBox(height: 3),
-
                     Text(
                       profile['email'] ?? '',
                       style: const TextStyle(
@@ -268,9 +295,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: Colors.black87,
                       ),
                     ),
-
                     const SizedBox(height: 14),
-
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 28),
                       child: Text(
@@ -284,9 +309,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 20),
-
                     SizedBox(
                       width: double.infinity,
                       height: 42,
@@ -321,9 +344,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 25),
-
                     Row(
                       children: [
                         _buildTab('Postingan Saya', 0),
@@ -331,9 +352,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         _buildTab('Arsip', 2),
                       ],
                     ),
-
                     const SizedBox(height: 8),
-
                     if (currentPosts.isEmpty)
                       const Padding(
                         padding: EdgeInsets.only(top: 40),
@@ -403,9 +422,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: isActive ? AppColors.primary : Colors.black54,
               ),
             ),
-
             const SizedBox(height: 7),
-
             Container(
               width: double.infinity,
               height: 2,
@@ -429,138 +446,141 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  post['imageUrl'] ?? '',
-                  width: 110,
-                  height: 90,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 110,
-                      height: 90,
-                      color: const Color(0xFFF1F1F1),
-                      child: const Icon(
-                        Icons.image_outlined,
-                        color: Colors.grey,
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(width: 12),
-
               Expanded(
-                child: SizedBox(
-                  height: 90,
-                  child: Align(
-                    alignment: isPublished
-                        ? Alignment.topLeft
-                        : Alignment.centerLeft,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (status == 'draft') ...[
-                          const Text(
-                            'Draf',
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 9,
-                              fontWeight: FontWeight.w500,
-                              color: Color.fromARGB(255, 82, 82, 82),
+                child: InkWell(
+                  onTap: isPublished
+                      ? () async {
+                          await openPostDetail(post);
+                        }
+                      : null,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          post['imageUrl'] ?? '',
+                          width: 110,
+                          height: 90,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 110,
+                              height: 90,
+                              color: const Color(0xFFF1F1F1),
+                              child: const Icon(
+                                Icons.image_outlined,
+                                color: Colors.grey,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 90,
+                          child: Align(
+                            alignment: isPublished
+                                ? Alignment.topLeft
+                                : Alignment.centerLeft,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (status == 'draft') ...[
+                                  const Text(
+                                    'Draf',
+                                    style: TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color.fromARGB(255, 82, 82, 82),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    post['title'] ?? '',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ] else if (status == 'archived') ...[
+                                  const Text(
+                                    'Diarsipkan',
+                                    style: TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color.fromARGB(255, 82, 82, 82),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    post['title'] ?? '',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ] else ...[
+                                  Text(
+                                    post['title'] ?? '',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    '${_formatDate(post['createdAt'])} • '
+                                    '${_calculateReadingTime(post['content'] ?? '')} Menit Baca',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color.fromARGB(255, 82, 82, 82),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    post['content'] ?? '',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
-
-                          const SizedBox(height: 3),
-
-                          Text(
-                            post['title'] ?? '',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ] else if (status == 'archived') ...[
-                          const Text(
-                            'Diarsipkan',
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 9,
-                              fontWeight: FontWeight.w500,
-                              color: Color.fromARGB(255, 82, 82, 82),
-                            ),
-                          ),
-
-                          const SizedBox(height: 3),
-
-                          Text(
-                            post['title'] ?? '',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ] else ...[
-                          Text(
-                            post['title'] ?? '',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                            ),
-                          ),
-
-                          const SizedBox(height: 3),
-
-                          Text(
-                            '${_formatDate(post['createdAt'])} • '
-                            '${_calculateReadingTime(post['content'] ?? '')} Menit Baca',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 9,
-                              fontWeight: FontWeight.w500,
-                              color: Color.fromARGB(255, 82, 82, 82),
-                            ),
-                          ),
-
-                          const SizedBox(height: 4),
-
-                          Text(
-                            post['content'] ?? '',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 9,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-
               const SizedBox(width: 8),
-
               SizedBox(
                 height: 90,
                 child: Align(
@@ -594,21 +614,25 @@ class _ProfilePageState extends State<ProfilePage> {
 
                         if (value == 'Arsipkan') {
                           await changePostStatus(post, 'archived');
+
                           return;
                         }
 
                         if (value == 'Publikasikan') {
                           await changePostStatus(post, 'published');
+
                           return;
                         }
 
                         if (value == 'Pulihkan') {
                           await changePostStatus(post, 'published');
+
                           return;
                         }
 
                         if (value == 'Hapus') {
                           await deletePost(post);
+
                           return;
                         }
                       },
@@ -650,7 +674,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
         ),
-
         const Divider(height: 1, thickness: 1, color: Color(0xFFE5E5E5)),
       ],
     );
