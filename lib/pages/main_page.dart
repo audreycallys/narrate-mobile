@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:narrate_blog/pages/category.dart';
 import 'package:narrate_blog/pages/create_post.dart';
 import 'package:narrate_blog/pages/home.dart';
@@ -16,6 +15,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int selectedIndex = 0;
+
   int savedRefreshKey = 0;
   int homeRefreshKey = 0;
   int categoryRefreshKey = 0;
@@ -28,29 +28,22 @@ class _MainPageState extends State<MainPage> {
         key: ValueKey(homeRefreshKey),
         onProfileTap: () {
           setState(() {
+            profileRefreshKey++;
             selectedIndex = 4;
           });
         },
       ),
-
       CategoryPage(key: ValueKey(categoryRefreshKey)),
-
-      // index 2 tidak dipakai sebagai halaman tab,
-      // karena tombol + membuka halaman Create menggunakan Navigator
       const SizedBox(),
-
       SavedPage(key: ValueKey(savedRefreshKey)),
-
       ProfilePage(key: ValueKey(profileRefreshKey)),
     ];
 
     return Scaffold(
       body: IndexedStack(index: selectedIndex, children: pages),
-
       bottomNavigationBar: BottomNav(
         selectedIndex: selectedIndex,
-        onTap: (index) {
-          // HOME
+        onTap: (index) async {
           if (index == 0) {
             setState(() {
               homeRefreshKey++;
@@ -60,26 +53,34 @@ class _MainPageState extends State<MainPage> {
             return;
           }
 
-          // CATEGORY
           if (index == 1) {
             setState(() {
               categoryRefreshKey++;
               selectedIndex = index;
             });
+
             return;
           }
 
-          // TOMBOL CREATE
           if (index == 2) {
-            Navigator.push(
+            final created = await Navigator.push<bool>(
               context,
               MaterialPageRoute(builder: (context) => const CreatePostPage()),
             );
 
+            if (!mounted) return;
+
+            if (created == true) {
+              setState(() {
+                homeRefreshKey++;
+                categoryRefreshKey++;
+                profileRefreshKey++;
+              });
+            }
+
             return;
           }
 
-          // SAVED
           if (index == 3) {
             setState(() {
               savedRefreshKey++;
@@ -89,12 +90,12 @@ class _MainPageState extends State<MainPage> {
             return;
           }
 
-          // PROFILE
           if (index == 4) {
             setState(() {
               profileRefreshKey++;
               selectedIndex = index;
             });
+
             return;
           }
 

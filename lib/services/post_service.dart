@@ -1,19 +1,21 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 class PostService {
+  static const String baseUrl =
+      'https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts';
+
   static Future<List> getPosts() async {
-    final response = await http.get(
-      Uri.parse('https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts'),
-    );
+    final response = await http.get(Uri.parse(baseUrl));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
       return data['data']['posts'];
-    } else {
-      throw Exception('Data artikel gagal diambil');
     }
+
+    throw Exception('Data artikel gagal diambil');
   }
 
   static Future<bool> createPost({
@@ -22,12 +24,9 @@ class PostService {
     required int categoryId,
     required String status,
     required List<int> tagIds,
-    required String imagePath,
+    required XFile image,
   }) async {
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse('https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts'),
-    );
+    final request = http.MultipartRequest('POST', Uri.parse(baseUrl));
 
     request.fields['title'] = title;
     request.fields['content'] = content;
@@ -35,7 +34,11 @@ class PostService {
     request.fields['status'] = status;
     request.fields['tagIds'] = jsonEncode(tagIds);
 
-    request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+    final imageBytes = await image.readAsBytes();
+
+    request.files.add(
+      http.MultipartFile.fromBytes('image', imageBytes, filename: image.name),
+    );
 
     final response = await request.send();
 
@@ -43,15 +46,10 @@ class PostService {
   }
 
   static Future<List> getPostsByStatus(String status) async {
-    final response = await http.get(
-      Uri.parse(
-        'https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts?status=$status',
-      ),
-    );
+    final response = await http.get(Uri.parse('$baseUrl?status=$status'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
       return data['data']['posts'];
     }
 
@@ -66,11 +64,9 @@ class PostService {
     required String status,
     required List<int> tagIds,
     String? imagePath,
+    XFile? image,
   }) async {
-    final request = http.MultipartRequest(
-      'PUT',
-      Uri.parse('https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts/$postId'),
-    );
+    final request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/$postId'));
 
     request.fields['title'] = title;
     request.fields['content'] = content;
@@ -78,7 +74,13 @@ class PostService {
     request.fields['status'] = status;
     request.fields['tagIds'] = jsonEncode(tagIds);
 
-    if (imagePath != null) {
+    if (image != null) {
+      final imageBytes = await image.readAsBytes();
+
+      request.files.add(
+        http.MultipartFile.fromBytes('image', imageBytes, filename: image.name),
+      );
+    } else if (imagePath != null) {
       request.files.add(await http.MultipartFile.fromPath('image', imagePath));
     }
 
@@ -88,9 +90,7 @@ class PostService {
   }
 
   static Future<bool> deletePost(int postId) async {
-    final response = await http.delete(
-      Uri.parse('https://rgxqmjcn-5000.asse.devtunnels.ms/api/posts/$postId'),
-    );
+    final response = await http.delete(Uri.parse('$baseUrl/$postId'));
 
     return response.statusCode == 200 || response.statusCode == 204;
   }

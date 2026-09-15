@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:narrate_blog/pages/detail_article.dart';
 import 'package:narrate_blog/services/post_service.dart';
 import 'package:narrate_blog/services/saved_service.dart';
@@ -21,7 +20,6 @@ class CategoryDetailPage extends StatefulWidget {
 
 class _CategoryDetailPageState extends State<CategoryDetailPage> {
   List posts = [];
-
   Set<int> savedPostIds = {};
 
   Future<void> getPosts() async {
@@ -45,9 +43,13 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
 
     setState(() {
       savedPostIds = savedPosts.map<int>((saved) {
-        final post = saved['post'] ?? saved;
+        final nestedPost = saved['post'];
 
-        return post['id'] ?? saved['postId'];
+        final postId =
+            saved['postId'] ??
+            (nestedPost is Map ? nestedPost['id'] : saved['id']);
+
+        return postId as int;
       }).toSet();
     });
   }
@@ -86,6 +88,24 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
         ),
       );
     }
+  }
+
+  Future<void> openPostDetail(Map post) async {
+    final changed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            DetailArticlePage(post: post, categoryName: widget.categoryName),
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (changed == true) {
+      await getPosts();
+    }
+
+    await getSavedPosts();
   }
 
   @override
@@ -141,9 +161,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 5),
-
               Text(
                 'Artikel seputar ${widget.categoryName.toLowerCase()}',
                 style: const TextStyle(
@@ -153,9 +171,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                   color: Colors.black,
                 ),
               ),
-
               const SizedBox(height: 28),
-
               Expanded(
                 child: posts.isEmpty
                     ? const Center(
@@ -178,23 +194,10 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                             title: post['title'],
                             createdAt: post['createdAt'],
                             content: post['content'],
-
                             isSaved: savedPostIds.contains(post['id']),
-
                             onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DetailArticlePage(
-                                    post: post,
-                                    categoryName: widget.categoryName,
-                                  ),
-                                ),
-                              );
-
-                              await getSavedPosts();
+                              await openPostDetail(post);
                             },
-
                             onBookmarkTap: () {
                               toggleSaved(post);
                             },
