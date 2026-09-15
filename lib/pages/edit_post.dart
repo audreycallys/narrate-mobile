@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/services/category_service.dart';
 import 'package:narrate_blog/services/post_service.dart';
@@ -34,13 +35,20 @@ class _EditPostPageState extends State<EditPostPage> {
 
   bool isLoading = false;
 
+  String normalizeTagName(String value) {
+    return value.trim().replaceAll('#', '').replaceAll(RegExp(r'\s+'), '');
+  }
+
+  String displayTagName(dynamic value) {
+    return '#${normalizeTagName(value.toString())}';
+  }
+
   @override
   void initState() {
     super.initState();
 
     titleController.text = widget.post['title'] ?? '';
     contentController.text = widget.post['content'] ?? '';
-
     selectedCategoryId = widget.post['categoryId'];
     selectedStatus = widget.post['status'] ?? 'published';
 
@@ -151,7 +159,7 @@ class _EditPostPageState extends State<EditPostPage> {
             autofocus: true,
             style: const TextStyle(fontFamily: 'PlusJakartaSans', fontSize: 12),
             decoration: InputDecoration(
-              hintText: 'Nama tag',
+              hintText: 'Contoh: #ForYouPage',
               hintStyle: const TextStyle(
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
@@ -176,7 +184,7 @@ class _EditPostPageState extends State<EditPostPage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final name = tagController.text.trim();
+                final name = normalizeTagName(tagController.text);
 
                 if (name.isEmpty) {
                   return;
@@ -184,7 +192,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
                 final existingTag = tags.where(
                   (tag) =>
-                      tag['name'].toString().toLowerCase() ==
+                      normalizeTagName(tag['name'].toString()).toLowerCase() ==
                       name.toLowerCase(),
                 );
 
@@ -217,7 +225,7 @@ class _EditPostPageState extends State<EditPostPage> {
 
                 final newTag = newTags.firstWhere(
                   (tag) =>
-                      tag['name'].toString().toLowerCase() ==
+                      normalizeTagName(tag['name'].toString()).toLowerCase() ==
                       name.toLowerCase(),
                 );
 
@@ -574,7 +582,7 @@ class _EditPostPageState extends State<EditPostPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              tag['name'],
+                              displayTagName(tag['name']),
                               style: const TextStyle(
                                 fontFamily: 'PlusJakartaSans',
                                 fontSize: 9,
@@ -613,7 +621,7 @@ class _EditPostPageState extends State<EditPostPage> {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                tag['name'],
+                                displayTagName(tag['name']),
                                 style: const TextStyle(
                                   fontFamily: 'PlusJakartaSans',
                                   fontSize: 9,
@@ -789,7 +797,6 @@ class _EditPostPageState extends State<EditPostPage> {
     titleController.dispose();
     contentController.dispose();
     tagController.dispose();
-
     super.dispose();
   }
 }

@@ -25,6 +25,15 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
   bool isSaved = false;
   bool isSaving = false;
 
+  String displayTagName(dynamic value) {
+    final name = value
+        .toString()
+        .replaceAll('#', '')
+        .replaceAll(RegExp(r'\s+'), '');
+
+    return '#$name';
+  }
+
   String formatDate(String createdAt) {
     final date = DateTime.parse(createdAt).toLocal();
 
@@ -48,6 +57,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
 
   int calculateReadingTime(String content) {
     final wordCount = content.trim().split(RegExp(r'\s+')).length;
+
     final minutes = (wordCount / 200).ceil();
 
     return minutes < 1 ? 1 : minutes;
@@ -107,7 +117,6 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
 
   Future<void> checkSavedStatus() async {
     final savedPosts = await SavedService.getSavedPosts();
-
     final postId = widget.post['id'];
 
     final alreadySaved = savedPosts.any((saved) {
@@ -219,11 +228,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
   void initState() {
     super.initState();
 
-    // Kalau dibuka dari halaman Tersimpan,
-    // bookmark langsung tampil aktif.
     isSaved = widget.initiallySaved;
-
-    // Tetap cek ke backend supaya status sinkron.
     checkSavedStatus();
   }
 
@@ -245,14 +250,12 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                   height: 300,
                   fit: BoxFit.cover,
                 ),
-
                 SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(25, 15, 25, 0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // BACK
                         InkWell(
                           onTap: () {
                             Navigator.pop(context);
@@ -271,10 +274,8 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                             ),
                           ),
                         ),
-
                         Row(
                           children: [
-                            // BOOKMARK
                             InkWell(
                               onTap: isSaving ? null : saveArticle,
                               borderRadius: BorderRadius.circular(50),
@@ -304,10 +305,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                                       ),
                               ),
                             ),
-
                             const SizedBox(width: 10),
-
-                            // MORE
                             Container(
                               width: 44,
                               height: 44,
@@ -375,7 +373,6 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                 ),
               ],
             ),
-
             Padding(
               padding: const EdgeInsets.fromLTRB(25, 18, 25, 30),
               child: Column(
@@ -403,7 +400,6 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                           ),
                         ),
                       ),
-
                       Text(
                         '${calculateReadingTime(widget.post['content'])} Menit Baca',
                         style: const TextStyle(
@@ -415,9 +411,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 12),
-
                   Text(
                     widget.post['title'],
                     style: const TextStyle(
@@ -428,9 +422,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                       color: Colors.black,
                     ),
                   ),
-
                   const SizedBox(height: 14),
-
                   Row(
                     children: [
                       const CircleAvatar(
@@ -438,9 +430,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                         backgroundColor: Color(0xFFE5F3F4),
                         child: Icon(Icons.person, color: AppColors.primary),
                       ),
-
                       const SizedBox(width: 10),
-
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -453,9 +443,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                               color: Colors.black,
                             ),
                           ),
-
                           const SizedBox(height: 2),
-
                           Text(
                             formatDate(widget.post['createdAt']),
                             style: const TextStyle(
@@ -469,10 +457,8 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                       ),
                     ],
                   ),
-
                   if (tags.isNotEmpty) ...[
                     const SizedBox(height: 16),
-
                     Wrap(
                       spacing: 7,
                       runSpacing: 7,
@@ -489,7 +475,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            '#${tag['name']}',
+                            displayTagName(tag['name']),
                             style: const TextStyle(
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 9,
@@ -501,9 +487,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                       }),
                     ),
                   ],
-
                   const SizedBox(height: 22),
-
                   Text(
                     widget.post['content'],
                     style: const TextStyle(

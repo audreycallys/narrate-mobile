@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/services/category_service.dart';
 import 'package:narrate_blog/services/post_service.dart';
@@ -23,15 +24,21 @@ class _CreatePostPageState extends State<CreatePostPage> {
   List tags = [];
 
   int? selectedCategoryId;
-
   List<int> selectedTagIds = [];
-
   String selectedStatus = 'published';
 
   XFile? selectedImage;
   Uint8List? selectedImageBytes;
 
   bool isLoading = false;
+
+  String normalizeTagName(String value) {
+    return value.trim().replaceAll('#', '').replaceAll(RegExp(r'\s+'), '');
+  }
+
+  String displayTagName(dynamic value) {
+    return '#${normalizeTagName(value.toString())}';
+  }
 
   Future<void> getCategories() async {
     try {
@@ -188,7 +195,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    tag['name'],
+                                    displayTagName(tag['name']),
                                     style: TextStyle(
                                       fontFamily: 'PlusJakartaSans',
                                       fontSize: 10,
@@ -233,7 +240,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         fontSize: 12,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Contoh: Mobile Development',
+                        hintText: 'Contoh: #ForyouPage',
                         hintStyle: const TextStyle(
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 11,
@@ -276,7 +283,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   onPressed: savingTag
                       ? null
                       : () async {
-                          final name = tagController.text.trim();
+                          final name = normalizeTagName(tagController.text);
 
                           if (name.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -291,7 +298,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
                           Map? existingTag;
 
                           for (final tag in tags) {
-                            if (tag['name'].toString().toLowerCase() ==
+                            if (normalizeTagName(
+                                  tag['name'].toString(),
+                                ).toLowerCase() ==
                                 name.toLowerCase()) {
                               existingTag = tag;
                               break;
@@ -329,7 +338,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             Map? newTag;
 
                             for (final tag in tags) {
-                              if (tag['name'].toString().toLowerCase() ==
+                              if (normalizeTagName(
+                                    tag['name'].toString(),
+                                  ).toLowerCase() ==
                                   name.toLowerCase()) {
                                 newTag = tag;
                                 break;
@@ -464,7 +475,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
   @override
   void initState() {
     super.initState();
-
     getCategories();
   }
 
@@ -473,7 +483,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
     titleController.dispose();
     contentController.dispose();
     tagController.dispose();
-
     super.dispose();
   }
 
@@ -707,7 +716,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  tag['name'],
+                                  displayTagName(tag['name']),
                                   style: const TextStyle(
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 9,
