@@ -1,8 +1,7 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/services/category_service.dart';
 import 'package:narrate_blog/services/post_service.dart';
@@ -29,13 +28,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
   String selectedStatus = 'published';
 
-  File? selectedImage;
+  XFile? selectedImage;
+  Uint8List? selectedImageBytes;
 
   bool isLoading = false;
 
-  // =========================
-  // GET CATEGORY
-  // =========================
   Future<void> getCategories() async {
     try {
       final result = await CategoryService.getCategories();
@@ -54,9 +51,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
     }
   }
 
-  // =========================
-  // GET TAG BERDASARKAN CATEGORY
-  // =========================
   Future<void> getTags(int categoryId) async {
     try {
       final result = await TagService.getTags(categoryId);
@@ -75,9 +69,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
     }
   }
 
-  // =========================
-  // PILIH GAMBAR
-  // =========================
   Future<void> pickImage() async {
     final picker = ImagePicker();
 
@@ -86,14 +77,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
       imageQuality: 80,
     );
 
-    if (pickedImage == null) {
-      return;
-    }
+    if (pickedImage == null) return;
 
-    final imageSize = await pickedImage.length();
+    final bytes = await pickedImage.readAsBytes();
 
-    // maksimal 5MB
-    if (imageSize > 5 * 1024 * 1024) {
+    if (bytes.length > 5 * 1024 * 1024) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -103,14 +91,14 @@ class _CreatePostPageState extends State<CreatePostPage> {
       return;
     }
 
+    if (!mounted) return;
+
     setState(() {
-      selectedImage = File(pickedImage.path);
+      selectedImage = pickedImage;
+      selectedImageBytes = bytes;
     });
   }
 
-  // =========================
-  // DIALOG TAMBAH / PILIH TAG
-  // =========================
   Future<void> showAddTagDialog() async {
     if (selectedCategoryId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -156,9 +144,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-
                       const SizedBox(height: 10),
-
                       Wrap(
                         spacing: 7,
                         runSpacing: 7,
@@ -212,7 +198,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                           : Colors.black,
                                     ),
                                   ),
-
                                   if (isSelected) ...[
                                     const SizedBox(width: 4),
                                     const Icon(
@@ -227,14 +212,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
                           );
                         }).toList(),
                       ),
-
                       const SizedBox(height: 20),
-
                       const Divider(),
-
                       const SizedBox(height: 10),
                     ],
-
                     const Text(
                       'Atau buat tag baru',
                       style: TextStyle(
@@ -243,9 +224,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-
                     const SizedBox(height: 8),
-
                     TextField(
                       controller: tagController,
                       autofocus: false,
@@ -293,7 +272,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     style: TextStyle(color: Colors.grey),
                   ),
                 ),
-
                 ElevatedButton(
                   onPressed: savingTag
                       ? null
@@ -310,7 +288,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             return;
                           }
 
-                          // CEK TAG SUDAH ADA
                           Map? existingTag;
 
                           for (final tag in tags) {
@@ -321,8 +298,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             }
                           }
 
-                          // Kalau tag sudah ada,
-                          // cukup pilih tag tersebut
                           if (existingTag != null) {
                             final int existingId = existingTag['id'];
 
@@ -344,16 +319,13 @@ class _CreatePostPageState extends State<CreatePostPage> {
                           });
 
                           try {
-                            // CREATE TAG BARU KE BACKEND
                             await TagService.createTag(
                               categoryId: selectedCategoryId!,
                               name: name,
                             );
 
-                            // AMBIL ULANG TAG DARI BACKEND
                             await getTags(selectedCategoryId!);
 
-                            // CARI TAG BARU
                             Map? newTag;
 
                             for (final tag in tags) {
@@ -364,7 +336,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                               }
                             }
 
-                            // OTOMATIS PILIH TAG BARU
                             if (newTag != null) {
                               final int newTagId = newTag['id'];
 
@@ -413,9 +384,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
     );
   }
 
-  // =========================
-  // CREATE POST
-  // =========================
   Future<void> submitPost() async {
     if (titleController.text.trim().isEmpty ||
         contentController.text.trim().isEmpty ||
@@ -438,11 +406,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
         content: contentController.text.trim(),
         categoryId: selectedCategoryId!,
         status: selectedStatus,
-
-        // TAG YANG DIPILIH DIKIRIM KE BACKEND
         tagIds: selectedTagIds,
-
-        imagePath: selectedImage!.path,
+        image: selectedImage!,
       );
 
       if (!mounted) return;
@@ -468,15 +433,14 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
         setState(() {
           selectedImage = null;
+          selectedImageBytes = null;
           selectedCategoryId = null;
           selectedStatus = 'published';
-
           tags = [];
           selectedTagIds = [];
         });
 
-        // KEMBALI KE HOME
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       } else {
         ScaffoldMessenger.of(
           context,
@@ -517,7 +481,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -525,9 +488,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // =========================
-                // HEADER
-                // =========================
                 Stack(
                   alignment: Alignment.center,
                   children: [
@@ -553,7 +513,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         ),
                       ),
                     ),
-
                     const Text(
                       'Buat Postingan',
                       style: TextStyle(
@@ -565,12 +524,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 25),
-
-                // =========================
-                // UPLOAD IMAGE
-                // =========================
                 InkWell(
                   onTap: pickImage,
                   borderRadius: BorderRadius.circular(14),
@@ -582,7 +536,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: const Color(0xFFBDBDBD)),
                     ),
-                    child: selectedImage == null
+                    child: selectedImageBytes == null
                         ? const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -613,8 +567,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                           )
                         : ClipRRect(
                             borderRadius: BorderRadius.circular(14),
-                            child: Image.file(
-                              selectedImage!,
+                            child: Image.memory(
+                              selectedImageBytes!,
                               width: double.infinity,
                               height: 165,
                               fit: BoxFit.cover,
@@ -622,12 +576,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                           ),
                   ),
                 ),
-
                 const SizedBox(height: 18),
-
-                // =========================
-                // JUDUL
-                // =========================
                 const Text(
                   'Judul',
                   style: TextStyle(
@@ -636,9 +585,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 TextField(
                   controller: titleController,
                   style: const TextStyle(
@@ -672,12 +619,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 14),
-
-                // =========================
-                // CATEGORY
-                // =========================
                 const Text(
                   'Kategori',
                   style: TextStyle(
@@ -686,9 +628,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 DropdownButtonFormField<int>(
                   value: selectedCategoryId,
                   hint: const Text(
@@ -728,9 +668,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   onChanged: (value) {
                     setState(() {
                       selectedCategoryId = value;
-
-                      // KALAU CATEGORY BERUBAH
-                      // TAG LAMA DIHAPUS
                       tags = [];
                       selectedTagIds = [];
                     });
@@ -740,12 +677,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     }
                   },
                 ),
-
                 const SizedBox(height: 14),
-
-                // =========================
-                // TAGS
-                // =========================
                 const Text(
                   'Tags',
                   style: TextStyle(
@@ -754,14 +686,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 7),
-
                 Wrap(
                   spacing: 7,
                   runSpacing: 7,
                   children: [
-                    // TAG YANG SUDAH DIPILIH
                     ...tags
                         .where((tag) => selectedTagIds.contains(tag['id']))
                         .map<Widget>((tag) {
@@ -786,9 +715,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                                     color: AppColors.primary,
                                   ),
                                 ),
-
                                 const SizedBox(width: 4),
-
                                 InkWell(
                                   onTap: () {
                                     setState(() {
@@ -805,8 +732,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             ),
                           );
                         }),
-
-                    // TOMBOL TAMBAH TAG
                     InkWell(
                       onTap: showAddTagDialog,
                       borderRadius: BorderRadius.circular(20),
@@ -838,12 +763,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 14),
-
-                // =========================
-                // CONTENT
-                // =========================
                 const Text(
                   'Konten',
                   style: TextStyle(
@@ -852,9 +772,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 TextField(
                   controller: contentController,
                   maxLines: 5,
@@ -880,12 +798,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
-                // =========================
-                // STATUS
-                // =========================
                 const Text(
                   'Status',
                   style: TextStyle(
@@ -894,9 +807,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 Row(
                   children: [
                     Radio<String>(
@@ -909,7 +820,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         });
                       },
                     ),
-
                     const Text(
                       'Publik',
                       style: TextStyle(
@@ -917,9 +827,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         fontSize: 12,
                       ),
                     ),
-
                     const SizedBox(width: 25),
-
                     Radio<String>(
                       value: 'draft',
                       groupValue: selectedStatus,
@@ -930,7 +838,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         });
                       },
                     ),
-
                     const Text(
                       'Draf',
                       style: TextStyle(
@@ -940,12 +847,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 20),
-
-                // =========================
-                // SUBMIT BUTTON
-                // =========================
                 SizedBox(
                   width: double.infinity,
                   height: 44,

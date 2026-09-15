@@ -5,7 +5,6 @@ class ArticleCard extends StatelessWidget {
   final String title;
   final String createdAt;
   final String content;
-
   final bool isSaved;
   final VoidCallback? onBookmarkTap;
   final VoidCallback? onTap;
@@ -44,6 +43,7 @@ class ArticleCard extends StatelessWidget {
 
   int calculateReadingTime() {
     final wordCount = content.trim().split(RegExp(r'\s+')).length;
+
     final minutes = (wordCount / 200).ceil();
 
     return minutes < 1 ? 1 : minutes;
@@ -67,6 +67,17 @@ class ArticleCard extends StatelessWidget {
                     width: 110,
                     height: 90,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 110,
+                        height: 90,
+                        color: const Color(0xFFF1F1F1),
+                        child: const Icon(
+                          Icons.image_outlined,
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
                   ),
                 ),
 

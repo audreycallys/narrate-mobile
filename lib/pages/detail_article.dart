@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/services/saved_service.dart';
+import 'package:narrate_blog/pages/edit_post.dart';
+import 'package:narrate_blog/services/post_service.dart';
 
 class DetailArticlePage extends StatefulWidget {
   final Map post;
   final String categoryName;
+  final bool initiallySaved;
 
   const DetailArticlePage({
     super.key,
     required this.post,
     required this.categoryName,
+    this.initiallySaved = false,
   });
 
   @override
@@ -120,9 +124,106 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
     });
   }
 
+  Future<void> archivePost() async {
+    final postTags = widget.post['tags'] ?? [];
+
+    final List<int> tagIds = postTags
+        .map<int>((tag) => tag['id'] as int)
+        .toList();
+
+    final success = await PostService.updatePost(
+      postId: widget.post['id'],
+      title: widget.post['title'],
+      content: widget.post['content'],
+      categoryId: widget.post['categoryId'],
+      status: 'archived',
+      tagIds: tagIds,
+    );
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Postingan berhasil diarsipkan')),
+      );
+
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Postingan gagal diarsipkan')),
+      );
+    }
+  }
+
+  Future<void> deletePost() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Hapus Postingan',
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: const Text(
+            'Apakah kamu yakin ingin menghapus postingan ini?',
+            style: TextStyle(fontFamily: 'PlusJakartaSans', fontSize: 12),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text(
+                'Hapus',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    final success = await PostService.deletePost(widget.post['id']);
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Postingan berhasil dihapus')),
+      );
+
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Postingan gagal dihapus')));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
+    // Kalau dibuka dari halaman Tersimpan,
+    // bookmark langsung tampil aktif.
+    isSaved = widget.initiallySaved;
+
+    // Tetap cek ke backend supaya status sinkron.
     checkSavedStatus();
   }
 
@@ -173,9 +274,7 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
 
                         Row(
                           children: [
-                            // =========================
                             // BOOKMARK
-                            // =========================
                             InkWell(
                               onTap: isSaving ? null : saveArticle,
                               borderRadius: BorderRadius.circular(50),
@@ -216,7 +315,57 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                                 color: Colors.white,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.more_vert, size: 24),
+                              child: PopupMenuButton<String>(
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(
+                                  Icons.more_vert,
+                                  size: 24,
+                                  color: Colors.black,
+                                ),
+                                onSelected: (value) async {
+                                  if (value == 'Edit') {
+                                    final updated = await Navigator.push<bool>(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            EditPostPage(post: widget.post),
+                                      ),
+                                    );
+
+                                    if (updated == true && mounted) {
+                                      Navigator.pop(context, true);
+                                    }
+
+                                    return;
+                                  }
+
+                                  if (value == 'Arsipkan') {
+                                    await archivePost();
+                                    return;
+                                  }
+
+                                  if (value == 'Hapus') {
+                                    await deletePost();
+                                    return;
+                                  }
+                                },
+                                itemBuilder: (context) {
+                                  return const [
+                                    PopupMenuItem(
+                                      value: 'Edit',
+                                      child: Text('Edit'),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'Arsipkan',
+                                      child: Text('Arsipkan'),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'Hapus',
+                                      child: Text('Hapus'),
+                                    ),
+                                  ];
+                                },
+                              ),
                             ),
                           ],
                         ),
