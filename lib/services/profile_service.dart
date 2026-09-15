@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 class ProfileService {
   static const String baseUrl =
@@ -12,7 +13,14 @@ class ProfileService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
 
-      return data['data']['profile'] ?? data['data'];
+      final Map profile = Map<String, dynamic>.from(
+        data['data']['profile'] ?? data['data'],
+      );
+
+      profile['imageUrl'] = profile['avatarUrl'];
+      profile['imagePublicId'] = profile['avatarPublicId'];
+
+      return profile;
     }
 
     throw Exception('Data profil gagal diambil');
@@ -22,7 +30,7 @@ class ProfileService {
     required String name,
     required String email,
     required String bio,
-    String? imagePath,
+    XFile? image,
   }) async {
     final request = http.MultipartRequest('PUT', Uri.parse(baseUrl));
 
@@ -30,8 +38,12 @@ class ProfileService {
     request.fields['email'] = email;
     request.fields['bio'] = bio;
 
-    if (imagePath != null) {
-      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+    if (image != null) {
+      final imageBytes = await image.readAsBytes();
+
+      request.files.add(
+        http.MultipartFile.fromBytes('image', imageBytes, filename: image.name),
+      );
     }
 
     final response = await request.send();

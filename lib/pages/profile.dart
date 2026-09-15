@@ -23,15 +23,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
   int selectedTab = 0;
   bool isLoading = true;
+  int avatarRefreshKey = 0;
 
   Future<void> getProfileData() async {
     try {
       final profileResult = await ProfileService.getProfile();
-
       final published = await PostService.getPostsByStatus('published');
-
       final draft = await PostService.getPostsByStatus('draft');
-
       final archived = await PostService.getPostsByStatus('archived');
 
       if (!mounted) return;
@@ -147,9 +145,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> changePostStatus(Map post, String newStatus) async {
     final postTags = post['tags'] ?? [];
 
-    final List<int> tagIds = postTags
-        .map<int>((tag) => tag['id'] as int)
-        .toList();
+    final List<int> tagIds = postTags.map<int>((tag) {
+      return tag['id'] as int;
+    }).toList();
 
     final success = await PostService.updatePost(
       postId: post['id'],
@@ -315,7 +313,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       height: 42,
                       child: ElevatedButton.icon(
                         onPressed: () async {
-                          await Navigator.push(
+                          final updated = await Navigator.push<bool>(
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
@@ -323,7 +321,21 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           );
 
-                          await getProfileData();
+                          if (!mounted) {
+                            return;
+                          }
+
+                          if (updated == true) {
+                            await getProfileData();
+
+                            if (!mounted) {
+                              return;
+                            }
+
+                            setState(() {
+                              avatarRefreshKey++;
+                            });
+                          }
                         },
                         icon: const Icon(Icons.edit_outlined, size: 17),
                         label: const Text(
@@ -387,10 +399,16 @@ class _ProfilePageState extends State<ProfilePage> {
     final imageUrl = profile['imageUrl'];
 
     if (imageUrl != null && imageUrl.toString().isNotEmpty) {
+      final imageUrlString = imageUrl.toString();
+
+      final separator = imageUrlString.contains('?') ? '&' : '?';
+
       return CircleAvatar(
         radius: 68,
         backgroundColor: const Color(0xFFDDF3F5),
-        backgroundImage: NetworkImage(imageUrl.toString()),
+        backgroundImage: NetworkImage(
+          '$imageUrlString${separator}v=$avatarRefreshKey',
+        ),
       );
     }
 
@@ -547,8 +565,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   const SizedBox(height: 3),
                                   Text(
-                                    '${_formatDate(post['createdAt'])} • '
-                                    '${_calculateReadingTime(post['content'] ?? '')} Menit Baca',
+                                    '${_formatDate(post['createdAt'])} • ${_calculateReadingTime(post['content'] ?? '')} Menit Baca',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
@@ -605,6 +622,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           );
 
+                          if (!mounted) {
+                            return;
+                          }
+
                           if (updated == true) {
                             await getProfileData();
                           }
@@ -614,25 +635,21 @@ class _ProfilePageState extends State<ProfilePage> {
 
                         if (value == 'Arsipkan') {
                           await changePostStatus(post, 'archived');
-
                           return;
                         }
 
                         if (value == 'Publikasikan') {
                           await changePostStatus(post, 'published');
-
                           return;
                         }
 
                         if (value == 'Pulihkan') {
                           await changePostStatus(post, 'published');
-
                           return;
                         }
 
                         if (value == 'Hapus') {
                           await deletePost(post);
-
                           return;
                         }
                       },

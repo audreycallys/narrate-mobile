@@ -1,8 +1,7 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/services/profile_service.dart';
 
@@ -20,7 +19,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final emailController = TextEditingController();
   final bioController = TextEditingController();
 
-  File? selectedImage;
+  XFile? selectedImage;
+  Uint8List? selectedImageBytes;
 
   bool isLoading = false;
 
@@ -34,8 +34,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   ImageProvider? _getProfileImage() {
-    if (selectedImage != null) {
-      return FileImage(selectedImage!);
+    if (selectedImageBytes != null) {
+      return MemoryImage(selectedImageBytes!);
     }
 
     final imageUrl = widget.profile['imageUrl'];
@@ -57,8 +57,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     if (image == null) return;
 
+    final bytes = await image.readAsBytes();
+
+    if (bytes.length > 5 * 1024 * 1024) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ukuran gambar maksimal 5MB')),
+      );
+
+      return;
+    }
+
+    if (!mounted) return;
+
     setState(() {
-      selectedImage = File(image.path);
+      selectedImage = image;
+      selectedImageBytes = bytes;
     });
   }
 
@@ -81,7 +96,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         name: nameController.text.trim(),
         email: emailController.text.trim(),
         bio: bioController.text.trim(),
-        imagePath: selectedImage?.path,
+        image: selectedImage,
       );
 
       if (!mounted) return;
@@ -141,7 +156,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                     ),
                   ),
-
                   Align(
                     alignment: Alignment.centerLeft,
                     child: InkWell(
@@ -166,9 +180,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 28),
-
               Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -184,7 +196,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           )
                         : null,
                   ),
-
                   Positioned(
                     right: 2,
                     bottom: 2,
@@ -209,9 +220,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 10),
-
               InkWell(
                 onTap: pickImage,
                 child: const Text(
@@ -224,36 +233,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 30),
-
               _buildLabel('Nama'),
-
               const SizedBox(height: 7),
-
               _buildTextField(
                 controller: nameController,
                 hintText: 'Masukkan nama',
               ),
-
               const SizedBox(height: 18),
-
               _buildLabel('Email'),
-
               const SizedBox(height: 7),
-
               _buildTextField(
                 controller: emailController,
                 hintText: 'Masukkan email',
                 keyboardType: TextInputType.emailAddress,
               ),
-
               const SizedBox(height: 18),
-
               _buildLabel('Bio'),
-
               const SizedBox(height: 7),
-
               TextField(
                 controller: bioController,
                 maxLines: 5,
@@ -291,9 +288,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 30),
-
               SizedBox(
                 width: double.infinity,
                 height: 44,
