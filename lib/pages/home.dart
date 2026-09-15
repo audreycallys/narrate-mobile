@@ -204,7 +204,7 @@ class _HomePageState extends State<HomePage> {
                           'Halo, ${profile['name'] ?? 'Pengguna'}!',
                           style: const TextStyle(
                             fontFamily: 'PlusJakartaSans',
-                            fontSize: 20,
+                            fontSize: 24,
                             fontWeight: FontWeight.w800,
                             color: Colors.black,
                           ),

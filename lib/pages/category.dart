@@ -15,13 +15,23 @@ class _CategoryPageState extends State<CategoryPage> {
   List posts = [];
 
   Future<void> getData() async {
-    final categoryResult = await CategoryService.getCategories();
-    final postResult = await PostService.getPosts();
+    try {
+      final categoryResult = await CategoryService.getCategories();
+      final postResult = await PostService.getPosts();
 
-    setState(() {
-      categories = categoryResult;
-      posts = postResult;
-    });
+      if (!mounted) return;
+
+      setState(() {
+        categories = categoryResult;
+        posts = postResult;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Data kategori gagal diambil')),
+      );
+    }
   }
 
   @override
@@ -40,28 +50,20 @@ class _CategoryPageState extends State<CategoryPage> {
     switch (name) {
       case 'Teknologi':
         return Icons.laptop_mac_outlined;
-
       case 'Pendidikan':
         return Icons.school_outlined;
-
       case 'Gaya Hidup':
         return Icons.wb_sunny_outlined;
-
       case 'Kesehatan':
         return Icons.favorite_border;
-
       case 'Makanan':
         return Icons.restaurant_outlined;
-
       case 'Perjalanan':
         return Icons.flight_outlined;
-
       case 'Bisnis':
         return Icons.business_center_outlined;
-
       case 'Desain':
         return Icons.palette_outlined;
-
       default:
         return Icons.article_outlined;
     }
@@ -71,28 +73,20 @@ class _CategoryPageState extends State<CategoryPage> {
     switch (name) {
       case 'Teknologi':
         return const Color(0xFFEDE3FA);
-
       case 'Pendidikan':
         return const Color(0xFFFFE5EA);
-
       case 'Gaya Hidup':
         return const Color(0xFFF8E2F1);
-
       case 'Kesehatan':
         return const Color(0xFFE4F4E6);
-
       case 'Makanan':
         return const Color(0xFFF6F3D9);
-
       case 'Perjalanan':
         return const Color(0xFFE2EBFA);
-
       case 'Bisnis':
         return const Color(0xFFFFE8DF);
-
       case 'Desain':
         return const Color(0xFFECE3F6);
-
       default:
         return const Color(0xFFF2F2F2);
     }
@@ -102,28 +96,20 @@ class _CategoryPageState extends State<CategoryPage> {
     switch (name) {
       case 'Teknologi':
         return const Color(0xFF9A6BC3);
-
       case 'Pendidikan':
         return const Color(0xFFE88698);
-
       case 'Gaya Hidup':
         return const Color(0xFFD781B5);
-
       case 'Kesehatan':
         return const Color(0xFF72B77B);
-
       case 'Makanan':
         return const Color(0xFFC5B852);
-
       case 'Perjalanan':
         return const Color(0xFF759ACD);
-
       case 'Bisnis':
         return const Color(0xFFD58A70);
-
       case 'Desain':
         return const Color(0xFF9C78BE);
-
       default:
         return Colors.grey;
     }
@@ -148,9 +134,7 @@ class _CategoryPageState extends State<CategoryPage> {
                   color: Colors.black,
                 ),
               ),
-
               const SizedBox(height: 15),
-
               Expanded(
                 child: categories.isEmpty
                     ? const Center(child: CircularProgressIndicator())
@@ -169,8 +153,8 @@ class _CategoryPageState extends State<CategoryPage> {
                           final articleCount = getArticleCount(category['id']);
 
                           return InkWell(
-                            onTap: () {
-                              Navigator.push(
+                            onTap: () async {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => CategoryDetailPage(
@@ -204,9 +188,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                       ),
                                     ),
                                   ),
-
                                   const SizedBox(height: 14),
-
                                   Text(
                                     category['name'],
                                     textAlign: TextAlign.center,
@@ -217,9 +199,7 @@ class _CategoryPageState extends State<CategoryPage> {
                                       color: Colors.black,
                                     ),
                                   ),
-
                                   const SizedBox(height: 4),
-
                                   Text(
                                     '$articleCount Artikel',
                                     style: const TextStyle(

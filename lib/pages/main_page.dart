@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:narrate_blog/pages/category.dart';
 import 'package:narrate_blog/pages/create_post.dart';
 import 'package:narrate_blog/pages/home.dart';
@@ -75,6 +76,7 @@ class _MainPageState extends State<MainPage> {
                 homeRefreshKey++;
                 categoryRefreshKey++;
                 profileRefreshKey++;
+                selectedIndex = 4;
               });
             }
 

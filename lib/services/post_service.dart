@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
@@ -26,23 +27,34 @@ class PostService {
     required List<int> tagIds,
     required XFile image,
   }) async {
-    final request = http.MultipartRequest('POST', Uri.parse(baseUrl));
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse(baseUrl));
 
-    request.fields['title'] = title;
-    request.fields['content'] = content;
-    request.fields['categoryId'] = categoryId.toString();
-    request.fields['status'] = status;
-    request.fields['tagIds'] = jsonEncode(tagIds);
+      request.fields['title'] = title;
+      request.fields['content'] = content;
+      request.fields['categoryId'] = categoryId.toString();
+      request.fields['status'] = status;
+      request.fields['tagIds'] = jsonEncode(tagIds);
 
-    final imageBytes = await image.readAsBytes();
+      final imageBytes = await image.readAsBytes();
 
-    request.files.add(
-      http.MultipartFile.fromBytes('image', imageBytes, filename: image.name),
-    );
+      request.files.add(
+        http.MultipartFile.fromBytes('image', imageBytes, filename: image.name),
+      );
 
-    final response = await request.send();
+      final streamedResponse = await request.send();
 
-    return response.statusCode == 200 || response.statusCode == 201;
+      final responseBody = await streamedResponse.stream.bytesToString();
+
+      debugPrint('CREATE POST STATUS: ${streamedResponse.statusCode}');
+      debugPrint('CREATE POST BODY: $responseBody');
+
+      return streamedResponse.statusCode == 200 ||
+          streamedResponse.statusCode == 201;
+    } catch (e) {
+      debugPrint('CREATE POST ERROR: $e');
+      rethrow;
+    }
   }
 
   static Future<List> getPostsByStatus(String status) async {
@@ -63,7 +75,6 @@ class PostService {
     required int categoryId,
     required String status,
     required List<int> tagIds,
-    String? imagePath,
     XFile? image,
   }) async {
     final request = http.MultipartRequest('PUT', Uri.parse('$baseUrl/$postId'));
@@ -80,13 +91,16 @@ class PostService {
       request.files.add(
         http.MultipartFile.fromBytes('image', imageBytes, filename: image.name),
       );
-    } else if (imagePath != null) {
-      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
     }
 
-    final response = await request.send();
+    final streamedResponse = await request.send();
 
-    return response.statusCode == 200;
+    final responseBody = await streamedResponse.stream.bytesToString();
+
+    debugPrint('UPDATE POST STATUS: ${streamedResponse.statusCode}');
+    debugPrint('UPDATE POST BODY: $responseBody');
+
+    return streamedResponse.statusCode == 200;
   }
 
   static Future<bool> deletePost(int postId) async {

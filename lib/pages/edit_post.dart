@@ -1,8 +1,7 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:narrate_blog/constants/app_colors.dart';
 import 'package:narrate_blog/services/category_service.dart';
 import 'package:narrate_blog/services/post_service.dart';
@@ -26,12 +25,12 @@ class _EditPostPageState extends State<EditPostPage> {
   List tags = [];
 
   int? selectedCategoryId;
-
   List<int> selectedTagIds = [];
 
   String selectedStatus = 'published';
 
-  File? selectedImage;
+  XFile? selectedImage;
+  Uint8List? selectedImageBytes;
 
   bool isLoading = false;
 
@@ -40,11 +39,9 @@ class _EditPostPageState extends State<EditPostPage> {
     super.initState();
 
     titleController.text = widget.post['title'] ?? '';
-
     contentController.text = widget.post['content'] ?? '';
 
     selectedCategoryId = widget.post['categoryId'];
-
     selectedStatus = widget.post['status'] ?? 'published';
 
     final postTags = widget.post['tags'];
@@ -104,13 +101,11 @@ class _EditPostPageState extends State<EditPostPage> {
       imageQuality: 80,
     );
 
-    if (pickedImage == null) {
-      return;
-    }
+    if (pickedImage == null) return;
 
-    final imageSize = await pickedImage.length();
+    final bytes = await pickedImage.readAsBytes();
 
-    if (imageSize > 5 * 1024 * 1024) {
+    if (bytes.length > 5 * 1024 * 1024) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -120,8 +115,11 @@ class _EditPostPageState extends State<EditPostPage> {
       return;
     }
 
+    if (!mounted) return;
+
     setState(() {
-      selectedImage = File(pickedImage.path);
+      selectedImage = pickedImage;
+      selectedImageBytes = bytes;
     });
   }
 
@@ -270,7 +268,7 @@ class _EditPostPageState extends State<EditPostPage> {
         categoryId: selectedCategoryId!,
         status: selectedStatus,
         tagIds: selectedTagIds,
-        imagePath: selectedImage?.path,
+        image: selectedImage,
       );
 
       if (!mounted) return;
@@ -314,7 +312,6 @@ class _EditPostPageState extends State<EditPostPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // HEADER
                 Stack(
                   alignment: Alignment.center,
                   children: [
@@ -351,10 +348,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 25),
-
-                // COVER
                 InkWell(
                   onTap: pickImage,
                   borderRadius: BorderRadius.circular(14),
@@ -366,11 +360,11 @@ class _EditPostPageState extends State<EditPostPage> {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: const Color(0xFFBDBDBD)),
                     ),
-                    child: selectedImage != null
+                    child: selectedImageBytes != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(14),
-                            child: Image.file(
-                              selectedImage!,
+                            child: Image.memory(
+                              selectedImageBytes!,
                               width: double.infinity,
                               height: 165,
                               fit: BoxFit.cover,
@@ -443,10 +437,7 @@ class _EditPostPageState extends State<EditPostPage> {
                           ),
                   ),
                 ),
-
                 const SizedBox(height: 18),
-
-                // JUDUL
                 const Text(
                   'Judul',
                   style: TextStyle(
@@ -455,9 +446,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 TextField(
                   controller: titleController,
                   style: const TextStyle(
@@ -491,10 +480,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 14),
-
-                // KATEGORI
                 const Text(
                   'Kategori',
                   style: TextStyle(
@@ -503,9 +489,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 DropdownButtonFormField<int>(
                   value: selectedCategoryId,
                   hint: const Text(
@@ -543,25 +527,18 @@ class _EditPostPageState extends State<EditPostPage> {
                     );
                   }).toList(),
                   onChanged: (value) {
-                    if (value == null) {
-                      return;
-                    }
+                    if (value == null) return;
 
                     setState(() {
                       selectedCategoryId = value;
-
                       selectedTagIds.clear();
-
                       tags = [];
                     });
 
                     getTags(value);
                   },
                 ),
-
                 const SizedBox(height: 14),
-
-                // TAGS
                 const Text(
                   'Tags',
                   style: TextStyle(
@@ -570,9 +547,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 7),
-
                 Wrap(
                   spacing: 7,
                   runSpacing: 7,
@@ -618,7 +593,6 @@ class _EditPostPageState extends State<EditPostPage> {
                         ),
                       );
                     }),
-
                     ...tags
                         .where((tag) => !selectedTagIds.contains(tag['id']))
                         .map((tag) {
@@ -648,7 +622,6 @@ class _EditPostPageState extends State<EditPostPage> {
                             ),
                           );
                         }),
-
                     InkWell(
                       onTap: showAddTagDialog,
                       borderRadius: BorderRadius.circular(20),
@@ -679,10 +652,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 14),
-
-                // KONTEN
                 const Text(
                   'Konten',
                   style: TextStyle(
@@ -691,9 +661,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 TextField(
                   controller: contentController,
                   maxLines: 5,
@@ -719,10 +687,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
-                // STATUS
                 const Text(
                   'Status',
                   style: TextStyle(
@@ -731,9 +696,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 Row(
                   children: [
                     Radio<String>(
@@ -773,9 +736,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 20),
-
                 SizedBox(
                   width: double.infinity,
                   height: 44,
