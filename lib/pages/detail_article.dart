@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 
 import 'package:narrate_blog/constants/app_colors.dart';
+
 import 'package:narrate_blog/services/saved_service.dart';
+
 import 'package:narrate_blog/pages/edit_post.dart';
+
 import 'package:narrate_blog/services/post_service.dart';
+
+import 'package:narrate_blog/services/profile_service.dart';
 
 class DetailArticlePage extends StatefulWidget {
   final Map post;
+
   final String categoryName;
+
   final bool initiallySaved;
 
   const DetailArticlePage({
@@ -23,7 +30,10 @@ class DetailArticlePage extends StatefulWidget {
 
 class _DetailArticlePageState extends State<DetailArticlePage> {
   bool isSaved = false;
+
   bool isSaving = false;
+
+  Map<dynamic, dynamic>? profile;
 
   String displayTagName(dynamic value) {
     final name = value
@@ -61,6 +71,16 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
     final minutes = (wordCount / 200).ceil();
 
     return minutes < 1 ? 1 : minutes;
+  }
+
+  Future<void> loadProfile() async {
+    final data = await ProfileService.getProfile();
+
+    if (!mounted) return;
+
+    setState(() {
+      profile = data;
+    });
   }
 
   Future<void> saveArticle() async {
@@ -117,10 +137,12 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
 
   Future<void> checkSavedStatus() async {
     final savedPosts = await SavedService.getSavedPosts();
+
     final postId = widget.post['id'];
 
     final alreadySaved = savedPosts.any((saved) {
       final post = saved['post'] ?? saved;
+
       final savedId = post['id'] ?? saved['postId'];
 
       return savedId == postId;
@@ -229,12 +251,21 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
     super.initState();
 
     isSaved = widget.initiallySaved;
+
     checkSavedStatus();
+
+    loadProfile();
   }
 
   @override
   Widget build(BuildContext context) {
     final tags = widget.post['tags'] ?? [];
+
+    final profileName = profile?['name']?.toString().trim().isNotEmpty == true
+        ? profile!['name'].toString()
+        : 'Pengguna';
+
+    final profileImage = profile?['imageUrl']?.toString();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -339,11 +370,13 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
 
                                   if (value == 'Arsipkan') {
                                     await archivePost();
+
                                     return;
                                   }
 
                                   if (value == 'Hapus') {
                                     await deletePost();
+
                                     return;
                                   }
                                 },
@@ -425,18 +458,24 @@ class _DetailArticlePageState extends State<DetailArticlePage> {
                   const SizedBox(height: 14),
                   Row(
                     children: [
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 20,
-                        backgroundColor: Color(0xFFE5F3F4),
-                        child: Icon(Icons.person, color: AppColors.primary),
+                        backgroundColor: const Color(0xFFE5F3F4),
+                        backgroundImage:
+                            profileImage != null && profileImage.isNotEmpty
+                            ? NetworkImage(profileImage)
+                            : null,
+                        child: profileImage == null || profileImage.isEmpty
+                            ? const Icon(Icons.person, color: AppColors.primary)
+                            : null,
                       ),
                       const SizedBox(width: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Sakezza Labiru',
-                            style: TextStyle(
+                          Text(
+                            profileName,
+                            style: const TextStyle(
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
